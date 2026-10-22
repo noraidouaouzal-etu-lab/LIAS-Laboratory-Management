@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mon Profil - Laboratoire LIAS')}"></head>
+<body>
+    <!-- Simple Top Navbar -->
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebars Dynamic -->
+            <div th:replace="~{fragments :: sidebar-dynamic('profile')}"></div>
+
+            <!-- Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-b border-bottom">
+                    <h1 class="h4">👤 Profil Académique</h1>
+                    <span class="badge bg-secondary" th:text="${member != null ? member.status : 'Chercheur'}">STATUT</span>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Profil mis à jour avec succès !
+                </div>
+
+                <div th:if="${member == null}" class="alert alert-warning py-2 text-xs">
+                    Aucun profil correspondant n'a été trouvé dans le système.
+                </div>
+
+                <div th:if="${member != null}">
+                    <form th:action="@{/profile}" method="post" enctype="multipart/form-data" th:object="${member}">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="row">
+                            <!-- Personal information Card -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card p-4 shadow-sm border-0 h-100 bg-white">
+                                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                        <span class="fs-5">👤</span>
+                                        <h5 class="fw-bold text-sm mb-0 text-dark">Informations personnelles</h5>
+                                    </div>
+
+                                    <div class="text-center mb-4">
+                                        <img th:src="${member != null ? '/profile/photo/' + member.id : '/images/default-avatar.png'}" 
+                                             alt="Photo de profil" 
+                                             class="rounded-circle border img-thumbnail shadow-sm mb-2" 
+                                             style="width: 110px; height: 110px; object-fit: cover;">
+                                        <div class="mt-2 text-start">
+                                            <label class="form-label text-xs fw-semibold text-secondary">Photo de profil (Upload)</label>
+                                            <input type="file" name="photoFile" class="form-control form-control-sm text-xs" accept="image/*">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-xs fw-semibold text-secondary">Prénom</label>
+                                            <input type="text" class="form-control form-control-sm text-xs" th:field="*{firstName}" th:readonly="${#authorization.expression('hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_ASSOCIATE'')') or consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-xs fw-semibold text-secondary">Nom</label>
+                                            <input type="text" class="form-control form-control-sm text-xs" th:field="*{lastName}" th:readonly="${#authorization.expression('hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_ASSOCIATE'')') or consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-semibold text-secondary">Adresse Email</label>
+                                        <input type="email" class="form-control form-control-sm text-xs text-muted bg-light" th:field="*{email}" readonly required>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-xs fw-semibold text-secondary">Statut de membre</label>
+                                            <input type="text" class="form-control form-control-sm text-xs text-muted bg-light" th:value="${member.status}" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-xs fw-semibold text-secondary">Date d'affiliation</label>
+                                            <input type="text" class="form-control form-control-sm text-xs text-muted bg-light font-mono" th:value="${member.affiliationDate != null ? member.affiliationDate : 'En cours'}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Scientific information Card -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card p-4 shadow-sm border-0 h-100 bg-white">
+                                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                        <span class="fs-5">🔬</span>
+                                        <h5 class="fw-bold text-sm mb-0 text-dark">Informations scientifiques</h5>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-semibold text-secondary">Institution de rattachement</label>
+                                        <input type="text" class="form-control form-control-sm text-xs" th:field="*{institution}" th:readonly="${#authorization.expression('hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_ASSOCIATE'')') or consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" placeholder="ex: Université Hassan II" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-semibold text-secondary">Laboratoire d'Origine</label>
+                                        <input type="text" class="form-control form-control-sm text-xs" th:field="*{originLab}" th:readonly="${#authorization.expression('hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_ASSOCIATE'')') or consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" placeholder="ex: LIAS, Partner Lab">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-semibold text-secondary">Équipe LIAS Actuelle</label>
+                                        <input type="text" class="form-control form-control-sm text-xs text-muted bg-light" th:value="${member.team != null ? member.team.name : 'Hors-équipe'}" readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-semibold text-secondary">Thèmes de Recherche & Intérêts Scientifiques</label>
+                                        <input type="text" class="form-control form-control-sm text-xs" th:field="*{interests}" th:readonly="${consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" placeholder="ex: Deep Learning, IoT, Smart Cities">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biography Card -->
+                        <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <span class="fs-5">✍️</span>
+                                <h5 class="fw-bold text-sm mb-0 text-dark">Biographie</h5>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label text-xs fw-semibold text-secondary">Description de votre parcours d'enseignement et de recherche</label>
+                                <textarea class="form-control text-xs leading-relaxed" rows="5" th:field="*{biography}" th:readonly="${consultOnly != null or member.status == 'RETIRED' or member.status == 'FORMER_MEMBER'}" placeholder="Décrivez vos travaux de recherche, vos enseignements..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 text-end" th:if="${consultOnly == null and member.status != 'RETIRED' and member.status != 'FORMER_MEMBER'}">
+                            <button type="submit" class="btn btn-warning btn-sm text-dark fw-bold px-4 py-2 shadow-sm">💾 Enregistrer mes modifications</button>
+                        </div>
+                    </form>
+
+                    <!-- Publications Card -->
+                    <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                            <span class="fs-5">📚</span>
+                            <h5 class="fw-bold text-sm mb-0 text-dark">Mes publications</h5>
+                        </div>
+                        <div class="table-responsive" th:if="${not #lists.isEmpty(myPublications)}">
+                            <table class="table table-sm table-hover mb-0 text-xs">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Auteur(s)</th>
+                                        <th>Titre de l'article / de l'ouvrage</th>
+                                        <th>Année</th>
+                                        <th>Équipe associée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="pub : ${myPublications}">
+                                        <td class="fw-bold text-dark" th:text="${pub.author}">Auteur</td>
+                                        <td class="text-muted font-serif" th:text="${pub.title}">Titre</td>
+                                        <td class="font-mono text-secondary" th:text="${pub.year}">2026</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark shadow-xs border" th:text="${pub.team}">Équipe</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${#lists.isEmpty(myPublications)}" class="text-center text-muted py-3 text-xs bg-light rounded border">
+                            Aucune publication.
+                        </div>
+                    </div>
+
+                    <!-- Affiliation history Card -->
+                    <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                            <span class="fs-5">🏫</span>
+                            <h5 class="fw-bold text-sm mb-0 text-dark">Historique des affiliations</h5>
+                        </div>
+                        <div class="table-responsive" th:if="${affiliationHistory != null && !#lists.isEmpty(affiliationHistory)}">
+                            <table class="table table-sm table-hover mb-0 text-xs">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>📅 Date Début</th>
+                                        <th>📅 Date Fin</th>
+                                        <th>🏫 Équipe / Affiliation académique</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="aff : ${affiliationHistory}">
+                                        <td class="font-mono text-dark" th:text="${aff.startDate}">Date Début</td>
+                                        <td class="font-mono text-dark" th:text="${aff.endDate != null ? aff.endDate : 'Actuel'}">Date Fin</td>
+                                        <td>
+                                            <strong th:text="${aff.teamName}">Équipe</strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${affiliationHistory == null || #lists.isEmpty(affiliationHistory)}" class="text-center text-muted py-3 text-xs bg-light rounded border">
+                            Aucun historique.
+                        </div>
+                    </div>
+
+                    <!-- Role History Section -->
+                    <div class="card p-4 mb-4 shadow-sm border-0 bg-white" th:if="${roleHistory != null && !#lists.isEmpty(roleHistory)}">
+                        <h5 class="fw-bold text-xs uppercase text-secondary mb-3">🕒 Historique des Rôles et Mandats de Direction</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 text-xs">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>📅 Date du changement</th>
+                                        <th>⚖️ Ancien Rôle</th>
+                                        <th>👑 Nouveau Rôle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="rHist : ${roleHistory}">
+                                        <td class="font-mono text-dark" th:text="${#temporals.format(rHist.changedAt, 'dd/MM/yyyy HH:mm')}">Date</td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${rHist.oldRole}">ANCIEN ROLE</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success" th:text="${rHist.newRole}">NOUVEAU ROLE</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- History Audit Section -->
+                    <div class="card p-4 mb-4 shadow-sm border-0 bg-white" th:if="${history != null && !#lists.isEmpty(history)}">
+                        <h5 class="fw-bold text-xs uppercase text-secondary mb-3">🕒 Historique d'Audit des Modifications</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 text-xs">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>📅 Date modification</th>
+                                        <th>🎨 Champs modifiés</th>
+                                        <th>❌ Ancienne valeur</th>
+                                        <th>✅ Nouvelle valeur</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="hist : ${history}">
+                                        <td class="font-mono text-dark" th:text="${#temporals.format(hist.changeDate, 'dd/MM/yyyy HH:mm')}">Date</td>
+                                        <td>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning" th:text="${hist.fieldName != null ? hist.fieldName : 'Snapshot global'}">Champs</span>
+                                        </td>
+                                        <td class="font-sans text-danger text-wrap" th:text="${hist.oldValue != null ? hist.oldValue : '---'}">Ancienne valeur</td>
+                                        <td class="font-sans text-success text-wrap" th:text="${hist.newValue != null ? hist.newValue : '---'}">Nouvelle valeur</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Annuaire des Membres - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebars Dynamic -->
+            <div th:replace="~{fragments :: sidebar-dynamic('members')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">👥 Annuaire des Membres du Laboratoire</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show text-xs py-2 px-3" role="alert">
+                    ⚡ Statut, Affiliation & Rôle mis à jour avec succès !
+                </div>
+                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show text-xs py-2 px-3" role="alert">
+                    ❌ Erreur lors de la modification : <span th:text="${param.error}"></span>
+                </div>
+
+                <div class="card p-3">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Chercheur</th>
+                                <th>Statut</th>
+                                <th>Équipe / Axe</th>
+                                <th>Email</th>
+                                <th>Institution Affiliée</th>
+                                <th>Laboratoire d'Origine</th>
+                                <th th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${members}">
+                                <td class="fw-bold">
+                                    <a th:href="@{'/member/profile/' + ${m.id}}" th:text="${m.firstName + ' ' + m.lastName}" class="text-primary text-decoration-none">Abdelouahad ENNASSIRI</a>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:style="${m.status == 'PERMANENT' ? 'background-color: rgba(25, 135, 84, 0.12) !important; color: #146c43 !important; border: 1px solid rgba(25, 135, 84, 0.2) !important;' : (m.status == 'DOCTORANT' ? 'background-color: rgba(255, 193, 7, 0.15) !important; color: #664d03 !important; border: 1px solid rgba(255, 193, 7, 0.25) !important;' : 'background-color: rgba(13, 110, 253, 0.12) !important; color: #0a58ca !important; border: 1px solid rgba(13, 110, 253, 0.2) !important;')}"
+                                          th:text="${m.status}">STATUS</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark font-mono text-xs border" th:text="${m.team != null ? m.team.name : 'Aucun'}">Équipe</span>
+                                </td>
+                                <td th:text="${m.email}">director@lias-lab.ma</td>
+                                <td th:text="${m.institution != null ? m.institution : 'FSBM'}">FSBM</td>
+                                <td th:text="${m.originLab != null ? m.originLab : 'LIAS'}">LIAS</td>
+                                <td th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+                                    <a th:href="@{'/director/members/edit/' + ${m.id}}" class="btn btn-outline-primary btn-2sm py-0 px-2 fw-semibold text-2xs" style="font-size: 11px;">✏️ Modifier</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

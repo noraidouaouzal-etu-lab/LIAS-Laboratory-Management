@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Logs d\'Audits - Administration LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-admin('logs')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📜 Logs d'Audits Système & Activités du Laboratoire</h1>
+                </div>
+
+                <div class="card p-3">
+                    <div class="bg-dark text-light p-3 rounded font-mono text-xs" style="min-height: 300px; line-height: 1.6;">
+                        <div th:each="log : ${logs}" class="mb-1">
+                            <span class="text-info">[SYSTEM]</span> <span th:text="${log}">Log entry...</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

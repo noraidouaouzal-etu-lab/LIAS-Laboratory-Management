@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Espace Doctorant - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-doctorant('dashboard')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="univ-title pb-1"><i class="fa-solid fa-graduation-cap text-primary me-2"></i> Tableau de Bord du Doctorant</h1>
+                    <span class="text-secondary small font-monospace" th:text="${currentUserMember != null && currentUserMember.status != null ? 'Statut : ' + currentUserMember.status : 'Statut : DOCTORANT'}">Statut : Doctorant Inscrit</span>
+                </div>
+
+                <!-- Professional Profile Greeting Block (Requirement 2) -->
+                <div class="card p-3 mb-4 bg-white border border-opacity-10 shadow-sm">
+                    <div class="d-flex align-items-center gap-3">
+                        <img th:src="${currentUserMember != null && currentUserMember.id != null ? '/profile/photo/' + currentUserMember.id : '/images/default-avatar.png'}" 
+                             alt="Photo de profil" class="profile-avatar">
+                        <div>
+                            <h4 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif; font-size: 1.15rem;">
+                                Bienvenue, <span th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Doctorant'}">Doctorant</span>
+                            </h4>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase" th:text="${currentUserMember != null && currentUserMember.status != null ? currentUserMember.status : 'DOCTORANT'}">DOCTORANT</span>
+                                <span class="ms-2" th:text="${currentUserMember != null ? currentUserMember.email : 'doctorant@lias.com'}">doctorant@lias.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 mb-4">
+                        <div class="card p-4">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-family: Georgia, serif;">Bienvenue dans votre espace universitaire de recherche</h5>
+                            <p class="text-secondary leading-relaxed">
+                                En tant que chercheur doctorant affilié au <strong>Laboratoire LIAS (Faculté des Sciences Ben M'Sik)</strong>, vous disposez d'un accès sécurisé pour renseigner l'état d'avancement de vos thèses, déposer vos publications scientifiques acceptées, et suivre l'agenda des événements académiques du laboratoire.
+                            </p>
+                            
+                            <hr class="my-3">
+
+                            <div class="row text-center text-md-start">
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-xs text-muted text-uppercase fw-semibold">Sujet / Intérêts de recherche</h6>
+                                    <p class="fw-bold fs-6" th:text="${(member != null && member.interests != null && !#strings.isEmpty(member.interests)) ? member.interests : 'Non renseigné'}">Non renseigné</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-xs text-muted text-uppercase fw-semibold">Équipe de recherche</h6>
+                                    <p class="fw-bold text-warning" th:text="${(member != null && member.team != null) ? member.team.name : 'Non affilié'}">Non affilié</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-xs text-muted text-uppercase fw-semibold">Directeur de Thèse Affilié</h6>
+                                    <p class="fw-bold text-primary" th:text="${supervisor}">Non renseigné</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-xs text-muted text-uppercase fw-semibold">Année d'inscription</h6>
+                                    <p class="fw-bold text-success" th:text="${member != null && member.academicYear != null ? member.academicYear + (member.academicYear == 1 ? 'ère' : 'ème') + ' Année de Doctorat' : 'Non renseigné'}">Non renseigné</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3 text-dark text-sm border-bottom pb-2" style="font-family: Georgia, serif;"><i class="fa-solid fa-cubes text-primary me-2"></i> Mon Tableau de bord de Recherche</h5>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4">
+                    <!-- My Profile Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-secondary"><i class="fa-solid fa-user-circle text-primary me-1"></i> Mon Profil Académique</h6>
+                                <p class="text-2xs text-muted mb-2">Gérez vos thèmes d'études thématiques, biographie et contacts académiques.</p>
+                            </div>
+                            <a href="/doctorant/profile" class="btn btn-outline-primary btn-xs py-1.5 fw-bold text-center mt-2">👤 Modifier mon profil</a>
+                        </div>
+                    </div>
+
+                    <!-- My Publications Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-success"><i class="fa-solid fa-book-open text-success me-1"></i> Mes Publications</h6>
+                                <p class="text-2xs text-muted mb-2">
+                                    Vous avez enregistré <strong class="text-success font-monospace" th:text="${myPublicationsCount != null ? myPublicationsCount : 0}">0</strong> publication(s) scientifique(s).
+                                </p>
+                            </div>
+                            <a href="/doctorant/publications" class="btn btn-success btn-xs py-1.5 fw-bold text-center text-white mt-2">➕ Gérer mes publications</a>
+                        </div>
+                    </div>
+
+                    <!-- Events Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-info"><i class="fa-solid fa-calendar-star text-info me-1"></i> Événements Scientifiques</h6>
+                                <p class="text-2xs text-muted mb-2">
+                                    Il y a actuellement <strong class="text-info font-monospace" th:text="${upcomingEventsCount != null ? upcomingEventsCount : 0}">0</strong> événement(s) planifié(s).
+                                </p>
+                            </div>
+                            <a href="/doctorant/events" class="btn btn-outline-info btn-xs py-1.5 fw-bold text-center mt-2">📅 Consulter les événements</a>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-warning"><i class="fa-solid fa-calendar-days text-warning me-1"></i> Calendrier Académique</h6>
+                                <p class="text-2xs text-muted mb-2">Accédez à l'agenda mensuel interactif du laboratoire pour toutes les manifestations.</p>
+                            </div>
+                            <a href="/calendar" class="btn btn-outline-warning text-dark btn-xs py-1.5 fw-bold text-center mt-2">🗓️ Ouvrir le calendrier</a>
+                        </div>
+                    </div>
+
+                    <!-- Documents Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-primary"><i class="fa-solid fa-folder-open text-primary me-1"></i> Documents Partagés</h6>
+                                <p class="text-2xs text-muted mb-2">
+                                    Accédez aux <strong class="text-primary font-monospace" th:text="${documentsCount != null ? documentsCount : 0}">0</strong> guide(s) et document(s) partagés.
+                                </p>
+                            </div>
+                            <a href="/member/documents" class="btn btn-outline-primary btn-xs py-1.5 fw-bold text-center mt-2">📂 Voir les documents</a>
+                        </div>
+                    </div>
+
+                    <!-- PV Meetings Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-danger"><i class="fa-solid fa-file-invoice text-danger me-1"></i> Procès-Verbaux (PV)</h6>
+                                <p class="text-2xs text-muted mb-2">
+                                    Consultez les <strong class="text-danger font-monospace" th:text="${pvMeetingsCount != null ? pvMeetingsCount : 0}">0</strong> procès-verbal/verbaux de réunion(s).
+                                </p>
+                            </div>
+                            <a href="/member/pv" class="btn btn-outline-danger btn-xs py-1.5 fw-bold text-center mt-2">📜 Consulter les PV</a>
+                        </div>
+                    </div>
+
+                    <!-- Internal Communication Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-dark"><i class="fa-solid fa-comments text-dark me-1"></i> Communication Interne</h6>
+                                <p class="text-2xs text-muted mb-2">Participez aux discussions, tchats et échanges internes entre membres du LIAS.</p>
+                            </div>
+                            <a href="/communication" class="btn btn-outline-dark btn-xs py-1.5 fw-bold text-center mt-2">💬 Ouvrir la communication</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

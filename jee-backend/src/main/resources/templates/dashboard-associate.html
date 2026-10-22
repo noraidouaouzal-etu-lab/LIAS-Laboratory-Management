@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Espace Membre Associé - Laboratoire LIAS')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container-fluid" id="associate_dashboard_container">
+    <div class="row">
+        <div th:replace="~{fragments :: sidebar-associate('dashboard')}"></div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4" id="associate_dashboard_main">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="univ-title pb-1" id="dashboard_title">
+                    <i class="fa-solid fa-microscope text-primary me-2"></i> Espace Enseignant-Chercheur Associé
+                </h1>
+                <span class="text-secondary small font-monospace" id="dashboard_status_badge">Statut : Membre Associé</span>
+            </div>
+
+            <!-- Professional Profile Greeting Block -->
+            <div class="card p-3 mb-4 bg-white border border-opacity-10 shadow-sm" id="dashboard_welcome_card">
+                <div class="d-flex align-items-center gap-3">
+                    <img th:src="${currentUserMember != null && currentUserMember.id != null ? '/profile/photo/' + currentUserMember.id : '/images/default-avatar.png'}"
+                         alt="Photo de profil" class="profile-avatar rounded-circle" style="width: 64px; height: 64px; object-fit: cover;" id="dashboard_profile_img">
+                    <div>
+                        <h4 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif; font-size: 1.25rem;" id="dashboard_welcome_name">
+                            Bienvenue, Pr. <span th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Associé'}">Associé</span>
+                        </h4>
+                        <div class="text-xs text-muted mt-1" id="dashboard_welcome_details">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary text-uppercase" th:text="${currentUserMember != null && currentUserMember.status != null ? currentUserMember.status : 'ASSOCIATE'}">ASSOCIATE</span>
+                            <span class="ms-2" th:text="${currentUserMember != null ? currentUserMember.email : 'associate@lias.com'}">associate@lias.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Info Cards -->
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4" id="dashboard_stats_row">
+                <!-- Publications Stat -->
+                <div class="col" id="dashboard_stat_publications">
+                    <div class="card p-3 h-100 bg-white border border-opacity-10 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted text-xs uppercase fw-bold">Publications</span>
+                            <i class="fa-solid fa-book-open text-primary fs-4"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-1" th:text="${myPublicationsCount}">0</h3>
+                        <p class="text-muted text-2xs mb-0">
+                            Vos publications associées (Total labo: <span th:text="${totalPublicationsCount}">0</span>)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Team Stat -->
+                <div class="col" id="dashboard_stat_team">
+                    <div class="card p-3 h-100 bg-white border border-opacity-10 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted text-xs uppercase fw-bold">Équipe de Recherche</span>
+                            <i class="fa-solid fa-users text-success fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1 text-truncate" th:text="${currentUserMember != null && currentUserMember.team != null ? currentUserMember.team.name : 'Non affilié'}">Non affilié</h6>
+                        <p class="text-muted text-2xs mb-0">Votre rattachement LIAS</p>
+                    </div>
+                </div>
+
+                <!-- Institution Stat -->
+                <div class="col" id="dashboard_stat_institution">
+                    <div class="card p-3 h-100 bg-white border border-opacity-10 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted text-xs uppercase fw-bold">Institution d'Attache</span>
+                            <i class="fa-solid fa-graduation-cap text-warning fs-4"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1 text-truncate" th:text="${currentUserMember != null && currentUserMember.institution != null ? currentUserMember.institution : 'Non renseignée'}">Non renseignée</h6>
+                        <p class="text-muted text-2xs mb-0" th:text="${currentUserMember != null && currentUserMember.originLab != null ? currentUserMember.originLab : 'Lab d''origine non renseigné'}">Lab d'origine</p>
+                    </div>
+                </div>
+
+                <!-- Documents Stat -->
+                <div class="col" id="dashboard_stat_documents">
+                    <div class="card p-3 h-100 bg-white border border-opacity-10 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted text-xs uppercase fw-bold">Documents Partagés</span>
+                            <i class="fa-solid fa-file-pdf text-info fs-4"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-1" th:text="${sharedDocuments != null ? sharedDocuments.size() : 0}">0</h3>
+                        <p class="text-muted text-2xs mb-0">Ressources & Guides LIAS</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="dashboard_details_row">
+                <!-- Left: Personal Information & Notifications -->
+                <div class="col-lg-6 mb-4" id="dashboard_left_column">
+                    <!-- Profile/Personal Information -->
+                    <div class="card p-4 mb-4 bg-white border border-opacity-10 shadow-sm" id="dashboard_personal_info_card">
+                        <h5 class="fw-bold mb-3 text-dark pb-2 border-bottom" style="font-family: Georgia, serif;">
+                            <i class="fa-solid fa-id-card text-primary me-2"></i> Informations Personnelles
+                        </h5>
+                        <div class="row g-3 text-sm text-secondary">
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Nom Complet</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Non renseigné'}">Pr. Nom</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Adresse Email</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null ? currentUserMember.email : 'associate@lias.com'}">associate@lias.com</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Statut Académique</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null && currentUserMember.status != null ? currentUserMember.status : 'ASSOCIATE'}">ASSOCIATE</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Date d'Affiliation</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null && currentUserMember.affiliationDate != null ? #temporals.format(currentUserMember.affiliationDate, 'dd MMMM yyyy') : 'Non renseignée'}">01 Janvier 2020</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Institution d'Origine</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null && currentUserMember.institution != null ? currentUserMember.institution : 'Non renseignée'}">Université Partenaire</strong>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="text-xs text-uppercase text-muted d-block">Laboratoire de Recherche</span>
+                                <strong class="text-dark" th:text="${currentUserMember != null && currentUserMember.originLab != null ? currentUserMember.originLab : 'Non renseigné'}">Lab Associé</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Latest Notifications -->
+                    <div class="card p-4 bg-white border border-opacity-10 shadow-sm" id="dashboard_notifications_card">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif;">
+                                <i class="fa-solid fa-bell text-warning me-2"></i> Dernières Notifications
+                            </h5>
+                            <a href="/notifications" class="text-primary text-xs fw-bold text-decoration-none">Voir tout</a>
+                        </div>
+                        <div class="list-group list-group-flush" id="dashboard_notifications_list">
+                            <div th:each="notif : ${latestNotifications}" class="list-group-item px-0 py-2.5 bg-transparent border-0 border-bottom border-light">
+                                <div class="d-flex justify-content-between">
+                                    <p class="text-sm text-dark mb-1 fw-medium" th:text="${notif.message}">Notification message</p>
+                                </div>
+                                <span class="text-2xs text-muted" th:text="${notif.date != null ? #temporals.format(notif.date, 'dd/MM/yyyy HH:mm') : ''}">Date</span>
+                            </div>
+                            <div th:if="${#lists.isEmpty(latestNotifications)}" class="text-center py-4 text-muted text-xs">
+                                <i class="fa-solid fa-circle-info text-secondary d-block fs-3 mb-2"></i> Aucune notification récente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Upcoming Events & Shared Documents -->
+                <div class="col-lg-6 mb-4" id="dashboard_right_column">
+                    <!-- Upcoming Events -->
+                    <div class="card p-4 mb-4 bg-white border border-opacity-10 shadow-sm" id="dashboard_events_card">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif;">
+                                <i class="fa-solid fa-calendar-days text-success me-2"></i> Événements Scientifiques
+                            </h5>
+                            <a href="/associate/events" class="text-primary text-xs fw-bold text-decoration-none">Tous les événements</a>
+                        </div>
+                        <div class="list-group list-group-flush" id="dashboard_events_list">
+                            <div th:each="event : ${upcomingEvents}" class="list-group-item px-0 py-2.5 bg-transparent border-0 border-bottom border-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded text-center p-2" style="min-width: 60px;">
+                                        <span class="d-block fw-bold fs-5 leading-none" th:text="${event.date != null ? #temporals.format(event.date, 'dd') : '??'}">01</span>
+                                        <span class="text-2xs text-uppercase fw-bold" th:text="${event.date != null ? #temporals.format(event.date, 'MMM') : '???'}">JAN</span>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <h6 class="text-sm fw-bold text-dark mb-0 text-truncate" th:text="${event.title}">Titre Événement</h6>
+                                        <div class="text-2xs text-muted d-flex gap-2 align-items-center mt-1">
+                                            <span><i class="fa-solid fa-tag me-1"></i> <span th:text="${event.type}">Type</span></span>
+                                            <span th:if="${!#strings.isEmpty(event.location)}"><i class="fa-solid fa-location-dot me-1"></i> <span th:text="${event.location}">Lieu</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(upcomingEvents)}" class="text-center py-4 text-muted text-xs">
+                                <i class="fa-solid fa-calendar-xmark text-secondary d-block fs-3 mb-2"></i> Aucun événement à venir.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shared Documents -->
+                    <div class="card p-4 bg-white border border-opacity-10 shadow-sm" id="dashboard_documents_card">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif;">
+                                <i class="fa-solid fa-folder-open text-info me-2"></i> Documents Partagés
+                            </h5>
+                            <a href="/member/documents" class="text-primary text-xs fw-bold text-decoration-none">Consulter l'espace docs</a>
+                        </div>
+                        <div class="list-group list-group-flush" id="dashboard_documents_list">
+                            <div th:each="doc : ${sharedDocuments}" class="list-group-item px-0 py-2.5 bg-transparent border-0 border-bottom border-light">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-file-lines text-info fs-5"></i>
+                                        <div>
+                                            <h6 class="text-sm fw-bold text-dark mb-0" th:text="${doc.name}">Nom Document</h6>
+                                            <span class="text-2xs text-muted" th:text="${doc.type}">PDF</span>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/documents/download/{id}(id=${doc.id})}" class="btn btn-xs btn-outline-info p-1 py-0.5" title="Télécharger">
+                                        <i class="fa-solid fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(sharedDocuments)}" class="text-center py-4 text-muted text-xs">
+                                <i class="fa-solid fa-file-circle-exclamation text-secondary d-block fs-3 mb-2"></i> Aucun document disponible.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

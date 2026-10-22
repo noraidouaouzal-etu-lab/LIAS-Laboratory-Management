@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Candidatures Adhésions - Direction LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('adhesions')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📨 Validation des Candidatures d'Adhésion (Membres & Doctorants)</h1>
+                </div>
+
+                <div th:if="${param.approved}" class="alert alert-success py-2 text-xs">
+                    Candidat approuvé avec succès !
+                </div>
+                <div th:if="${param.rejected}" class="alert alert-danger py-2 text-xs">
+                    Candidat rejeté avec succès.
+                </div>
+
+                <div class="card p-3 mb-4 bg-light border-0">
+                    <form th:action="@{/director/adhesions}" method="get" class="row g-2 align-items-center">
+                        <div class="col-auto">
+                            <label for="statusFilter" class="form-label mb-0 fw-semibold text-xs">Filtrer par statut :</label>
+                        </div>
+                        <div class="col-auto">
+                            <select id="statusFilter" name="status" class="form-select form-select-sm text-xs" onchange="this.form.submit()">
+                                <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Tous les statuts</option>
+                                <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">En attente (PENDING)</option>
+                                <option value="ACCEPTED" th:selected="${selectedStatus == 'ACCEPTED'}">Acceptés (ACCEPTED)</option>
+                                <option value="REJECTED" th:selected="${selectedStatus == 'REJECTED'}">Rejetés (REJECTED)</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-secondary btn-sm text-xs px-3">Filtrer</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card p-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Candidat / Infos</th>
+                                <th>Institution & Lab</th>
+                                <th>Motivation & Projet</th>
+                                <th>CV</th>
+                                <th>Soumis le</th>
+                                <th>Statut décisionnel</th>
+                                <th>Actions de validation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="req : ${requests}" th:if="${req != null}">
+                                <td>
+                                    <div th:text="${req.firstName != null && req.firstName != '' ? (req.firstName + ' ' + (req.lastName != null ? req.lastName : '')) : req.name}" class="fw-bold text-dark"></div>
+                                    <span th:text="${req.email}" class="text-xs text-muted d-block"></span>
+                                    <span class="badge bg-light text-secondary border text-2xs mt-1" th:text="${'Rôle demandé : ' + (req.requestedRole != null ? req.requestedRole : 'DOCTORANT')}"></span>
+                                </td>
+                                <td class="text-xs">
+                                    <span th:text="${req.institution != null ? req.institution : 'N/A'}" class="fw-semibold"></span><br/>
+                                    <span th:text="${req.originLab != null ? req.originLab : 'N/A'}" class="text-muted text-2xs"></span>
+                                </td>
+                                <td th:text="${req.motivation}" style="max-width: 300px;" class="text-xs">Projet de thèse en Embedded Edge AI...</td>
+                                <td>
+                                    <a th:href="@{'/director/adhesions/download-cv/' + ${req.id}}" class="btn btn-outline-danger btn-xs py-1 px-2 text-2xs fw-semibold" target="_blank">
+                                        <i class="fa-solid fa-file-pdf me-1"></i> Télécharger CV
+                                    </a>
+                                </td>
+                                <td th:text="${req.createdDate != null ? #temporals.format(req.createdDate, 'dd/MM/yyyy HH:mm') : ''}" class="text-xs font-mono">Date</td>
+                                <td>
+                                    <span th:class="${'badge ' + (req.status == 'ACCEPTED' ? 'bg-success' : (req.status == 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark'))}" 
+                                          th:text="${req.status}">PENDING</span>
+                                </td>
+                                <td>
+                                    <div th:if="${req.status == 'PENDING'}">
+                                        <form th:action="@{'/director/adhesions/approve/' + ${req.id}}" method="post" class="mb-1">
+                                            <div class="input-group input-group-sm mb-1" style="max-width: 210px;">
+                                                <select class="form-select form-select-xs py-0" name="targetRole" required style="font-size: 10px; height: 24px;">
+                                                    <option value="PERMANENT_MEMBER">PERMANENT_MEMBER</option>
+                                                    <option value="ASSOCIATE">ASSOCIATE</option>
+                                                    <option value="DOCTORANT">DOCTORANT</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-success btn-xs" style="font-size: 10px; height: 24px; padding: 0 8px;">✔️ OK</button>
+                                            </div>
+                                        </form>
+                                        <form th:action="@{'/director/adhesions/reject/' + ${req.id}}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-xs btn-outline-danger" style="font-size:10px; padding: 2px 6px;">❌ Rejeter</button>
+                                        </form>
+                                    </div>
+                                    <span class="text-muted text-xs italic" th:if="${req.status != 'PENDING'}">Validé par Direction</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${requests == null || #lists.isEmpty(requests)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <div class="py-3">
+                                        <span class="fw-semibold text-xs text-secondary d-block">Aucune demande d'adhésion trouvée</span>
+                                        <span class="text-2xs text-muted">Il n'y a aucun dossier d'inscription pour le statut sélectionné.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

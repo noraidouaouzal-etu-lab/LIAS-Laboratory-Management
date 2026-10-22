@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Calendrier Académique - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div th:class="${#authorization.expression('isAuthenticated()')} ? 'container-fluid' : 'container my-5'">
+        <div th:class="${#authorization.expression('isAuthenticated()')} ? 'row' : 'row'">
+            <!-- Sidebar Dispatcher (Only if authenticated) -->
+            <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+                <div th:replace="~{fragments :: sidebar-dynamic('calendar')}"></div>
+            </th:block>
+
+            <main th:class="${#authorization.expression('isAuthenticated()')} ? 'col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4' : 'col-12'">
+                <div class="row mb-4">
+            <div class="col-12 text-center text-md-start">
+                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill mb-2 fw-semibold text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-calendar-days text-primary me-1"></i> Agenda Scientifique
+                </span>
+                <h2 class="fw-bold text-dark mb-1">📅 Calendrier des Manifestations Académiques</h2>
+                <p class="text-secondary text-sm">Suivez et planifiez votre participation aux conférences, séminaires et ateliers pratiques du LIAS.</p>
+            </div>
+        </div>
+
+         <!-- Hidden database events list for JavaScript parsing -->
+        <div id="eventsDataContainer" style="display:none;">
+            <div th:each="ev : ${events}" 
+                 th:if="${ev != null}"
+                 th:data-id="${ev.id}" 
+                 th:data-title="${ev.title}" 
+                 th:data-date="${ev.date}" 
+                 th:data-time="${ev.time}"
+                 th:data-type="${ev.type}"
+                 th:data-location="${ev.location}"
+                 th:data-description="${ev.description}"
+                 th:data-organizers="${ev.organizersDisplayString}">
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Calendar Grid Card (Col 8) -->
+            <div class="col-lg-8">
+                <div class="card p-4 border-0 shadow-sm bg-white rounded-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-primary fs-5"></i>
+                            <h5 class="fw-bold text-sm uppercase mb-0 text-dark">Grille des Manifestations</h5>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <button id="prevMonthBtn" class="btn btn-outline-secondary btn-sm px-2.5 py-1 text-xs fw-semibold rounded-2">
+                                <i class="fa-solid fa-chevron-left me-1"></i> Précédent
+                            </button>
+                            <span id="calendarMonthYear" class="fw-bold text-xs font-mono bg-light border px-3 py-1.5 rounded-2 text-dark">
+                                Juin 2026
+                            </span>
+                            <button id="nextMonthBtn" class="btn btn-outline-secondary btn-sm px-2.5 py-1 text-xs fw-semibold rounded-2">
+                                Suivant <i class="fa-solid fa-chevron-right ms-1"></i>
+                            </button>
+                            <button id="todayBtn" class="btn btn-primary btn-sm px-2.5 py-1 text-xs fw-semibold text-white rounded-2">
+                                Aujourd'hui
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filter Controls inside Calendar Card -->
+                    <div class="row g-2 mb-4 bg-light p-3 rounded-3 border border-secondary border-opacity-10">
+                        <div class="col-md-7">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted text-xs rounded-start-2"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="calendarSearchInput" class="form-control text-xs border-start-0 rounded-end-2 py-2" placeholder="Rechercher par titre, lieu ou organisateur...">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <select id="calendarTypeFilter" class="form-select form-select-sm text-xs rounded-2 py-2">
+                                <option value="ALL">Tous les types d'activités</option>
+                                <option value="CONFERENCE">Conférence (CONFERENCE)</option>
+                                <option value="SEMINAR">Séminaire (SEMINAR)</option>
+                                <option value="WORKSHOP">Atelier / Workshop (WORKSHOP)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center text-xs mb-0 bg-white border-light-subtle rounded-3 overflow-hidden shadow-2xs" style="table-layout: fixed;">
+                            <thead>
+                                <tr class="bg-dark text-white font-mono">
+                                    <th class="py-2.5" style="width: 14.28%;">Lun</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Mar</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Mer</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Jeu</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Ven</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Sam</th>
+                                    <th class="py-2.5" style="width: 14.28%;">Dim</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calendarGrid">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Event Information (Col 4) -->
+            <div class="col-lg-4">
+                <div class="card p-4 border-0 shadow-sm bg-white rounded-4 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                        <i class="fa-solid fa-circle-info text-primary fs-5"></i>
+                        <h5 class="fw-bold text-sm uppercase mb-0 text-dark">Détails de la Sélection</h5>
+                    </div>
+
+                    <!-- Daily event list block -->
+                    <div id="calendarDetailsBox" class="flex-grow-1">
+                        <div id="selectedDayHeader" class="fw-bold text-xs text-secondary font-mono mb-3 bg-light p-2 rounded-2 border">
+                            Sélectionnez un jour sur le calendrier pour voir les détails.
+                        </div>
+
+                        <!-- Placeholder for list -->
+                        <div id="dayEventsList" class="space-y-3">
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-hand-pointer fa-3x text-primary text-opacity-35 mb-3 d-block"></i>
+                                <p class="text-xs m-0">Cliquez sur une date du calendrier pour examiner les détails des manifestations scientifiques de ce jour-là.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Month View Summary/Empty State -->
+                    <div id="monthEventsSummaryBox" class="mt-4 pt-3 border-top">
+                        <h6 class="fw-bold text-xs uppercase mb-2 text-primary">📅 Aperçu des événements du mois :</h6>
+                        <div id="monthEventsList" class="space-y-2" style="max-height: 240px; overflow-y: auto;">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const container = document.getElementById("eventsDataContainer");
+            const allEvents = [];
+            if (container) {
+                const divs = container.children;
+                for (let i = 0; i < divs.length; i++) {
+                    const div = divs[i];
+                    allEvents.push({
+                        id: div.getAttribute("data-id"),
+                        title: div.getAttribute("data-title") || "Sans titre",
+                        date: div.getAttribute("data-date"), // Format YYYY-MM-DD
+                        time: div.getAttribute("data-time") || "",
+                        type: div.getAttribute("data-type") || "AUTRE",
+                        location: div.getAttribute("data-location") || "Non spécifié",
+                        description: div.getAttribute("data-description") || "Aucune description.",
+                        organizers: div.getAttribute("data-organizers") || ""
+                    });
+                }
+            }
+
+            // Filtering state
+            let searchQuery = "";
+            let typeFilter = "ALL";
+
+            // Initialize to current date (or 2026-06-01 as current local baseline)
+            let currentDate = new Date();
+            if (allEvents.length > 0) {
+                const sortedEvents = [...allEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const firstEventDate = new Date(sortedEvents[0].date);
+                if (!isNaN(firstEventDate.getTime())) {
+                    currentDate = new Date(firstEventDate.getFullYear(), firstEventDate.getMonth(), 1);
+                }
+            }
+
+            const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+            // Color palette mapping helper according to requirements
+            function getEventColors(type) {
+                switch(type.toUpperCase()) {
+                    case 'CONFERENCE':
+                        return {
+                            primary: '#0d6efd', // Blue
+                            bgLight: 'rgba(13, 110, 253, 0.08)',
+                            border: 'rgba(13, 110, 253, 0.2)',
+                            text: '#0d6efd',
+                            icon: 'fa-solid fa-laptop-code',
+                            badgeClass: 'bg-primary text-white'
+                        };
+                    case 'WORKSHOP':
+                        return {
+                            primary: '#198754', // Green
+                            bgLight: 'rgba(25, 135, 84, 0.08)',
+                            border: 'rgba(25, 135, 84, 0.2)',
+                            text: '#198754',
+                            icon: 'fa-solid fa-gears',
+                            badgeClass: 'bg-success text-white'
+                        };
+                    case 'SEMINAR':
+                        return {
+                            primary: '#6f42c1', // Purple
+                            bgLight: 'rgba(111, 66, 193, 0.08)',
+                            border: 'rgba(111, 66, 193, 0.2)',
+                            text: '#6f42c1',
+                            icon: 'fa-solid fa-graduation-cap',
+                            badgeClass: 'text-white'
+                        };
+                    default:
+                        return {
+                            primary: '#fd7e14', // Orange (Other)
+                            bgLight: 'rgba(253, 126, 20, 0.08)',
+                            border: 'rgba(253, 126, 20, 0.2)',
+                            text: '#fd7e14',
+                            icon: 'fa-solid fa-star',
+                            badgeClass: 'bg-warning text-dark'
+                        };
+                }
+            }
+
+            function getFilteredEvents() {
+                return allEvents.filter(e => {
+                    const matchesSearch = searchQuery === "" || 
+                        e.title.toLowerCase().includes(searchQuery) || 
+                        e.description.toLowerCase().includes(searchQuery) ||
+                        e.location.toLowerCase().includes(searchQuery) ||
+                        e.organizers.toLowerCase().includes(searchQuery);
+                    
+                    const matchesType = typeFilter === "ALL" || e.type.toUpperCase() === typeFilter.toUpperCase();
+                    
+                    return matchesSearch && matchesType;
+                });
+            }
+
+            function renderEventDetailHTML(m) {
+                const colors = getEventColors(m.type);
+                
+                // Organizers fallback check
+                const displayOrganizers = (m.organizers && m.organizers.trim() !== "") ? m.organizers : "Aucun organisateur.";
+                
+                // Dynamic labels
+                let typeLabel = m.type;
+                if (m.type === 'CONFERENCE') typeLabel = 'Conférence';
+                else if (m.type === 'WORKSHOP') typeLabel = 'Atelier / Workshop';
+                else if (m.type === 'SEMINAR') typeLabel = 'Séminaire';
+                else typeLabel = 'Autre Manifestation';
+                
+                return `
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white hover-shadow transition-all" style="border-left: 5px solid ${colors.primary} !important;">
+                        <!-- Badge row -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge rounded-pill px-3 py-1.5 fw-bold text-xs" style="background-color: ${colors.bgLight}; color: ${colors.primary}; border: 1px solid ${colors.border};">
+                                <i class="${colors.icon} me-1"></i> ${typeLabel}
+                            </span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 text-2xs fw-bold">
+                                <i class="fa-solid fa-circle-dot text-success me-1"></i> Confirmé
+                            </span>
+                        </div>
+                        
+                        <!-- Title -->
+                        <h6 class="fw-bold text-dark mb-3 text-sm leading-snug">${m.title}</h6>
+                        
+                        <!-- Fields list -->
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Date -->
+                            <div class="d-flex align-items-center text-xs text-secondary">
+                                <div class="bg-light rounded-circle p-2 text-primary me-2.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-calendar-alt"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block uppercase fw-bold font-mono" style="font-size: 8px;">Date</small>
+                                    <span class="fw-semibold text-dark">${m.date ? m.date : 'Non renseigné'}</span>
+                                </div>
+                            </div>
+
+                            <!-- Time -->
+                            <div class="d-flex align-items-center text-xs text-secondary">
+                                <div class="bg-light rounded-circle p-2 text-warning me-2.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block uppercase fw-bold font-mono" style="font-size: 8px;">Horaire</small>
+                                    <span class="fw-semibold text-dark">${m.time ? m.time : 'Non renseigné'}</span>
+                                </div>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="d-flex align-items-center text-xs text-secondary">
+                                <div class="bg-light rounded-circle p-2 text-danger me-2.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block uppercase fw-bold font-mono" style="font-size: 8px;">Lieu</small>
+                                    <span class="fw-semibold text-dark">${m.location ? m.location : 'Non renseigné'}</span>
+                                </div>
+                            </div>
+
+                            <!-- Organizers -->
+                            <div class="d-flex align-items-start text-xs text-secondary">
+                                <div class="bg-light rounded-circle p-2 text-info me-2.5 d-flex align-items-center justify-content-center mt-0.5" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <small class="text-muted d-block uppercase fw-bold font-mono" style="font-size: 8px;">Organisateurs</small>
+                                    <span class="fw-semibold text-dark">${displayOrganizers}</span>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="d-flex align-items-start text-xs text-secondary pt-2 border-top border-light">
+                                <div class="bg-light rounded-circle p-2 text-success me-2.5 d-flex align-items-center justify-content-center mt-0.5" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-file-text"></i>
+                                </div>
+                                <div class="flex-grow-1 col-md-11">
+                                    <small class="text-muted d-block uppercase fw-bold font-mono" style="font-size: 8px;">Description</small>
+                                    <p class="mb-0 text-xs text-secondary leading-relaxed">${m.description ? m.description : 'Aucune description disponible.'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+
+                document.getElementById("calendarMonthYear").innerText = monthNames[month] + " " + year;
+
+                // First day of the month
+                const firstDay = new Date(year, month, 1);
+                // Day of the week (0 is Sunday, convert to 1-7 starting with Monday)
+                let startDay = firstDay.getDay();
+                if (startDay === 0) startDay = 7; // Sunday is 7th day
+
+                // Total days in month
+                const totalDays = new Date(year, month + 1, 0).getDate();
+
+                const grid = document.getElementById("calendarGrid");
+                grid.innerHTML = "";
+
+                let row = document.createElement("tr");
+                
+                // Fill previous month's empty slots
+                for (let i = 1; i < startDay; i++) {
+                    const cell = document.createElement("td");
+                    cell.className = "bg-light text-muted text-opacity-25 border-light-subtle";
+                    cell.innerText = "";
+                    row.appendChild(cell);
+                }
+
+                const currentFilteredEvents = getFilteredEvents();
+
+                // Group current month events to check if empty
+                const monthEvents = currentFilteredEvents.filter(e => {
+                    if (!e.date) return false;
+                    const parts = e.date.split("-");
+                    if (parts.length < 2) return false;
+                    return parseInt(parts[0], 10) === year && parseInt(parts[1], 10) === (month + 1);
+                });
+
+                // Populate monthly preview list
+                const monthListDiv = document.getElementById("monthEventsList");
+                monthListDiv.innerHTML = "";
+
+                if (monthEvents.length === 0) {
+                    const emptyState = document.createElement("div");
+                    emptyState.className = "card border-0 shadow-sm p-4 text-center rounded-3 bg-light mb-2";
+                    emptyState.innerHTML = `
+                        <div class="text-warning text-opacity-50 mb-2"><i class="fa-solid fa-calendar-xmark fa-2x"></i></div>
+                        <h6 class="fw-bold text-dark text-xs mb-1">📆 Aucun événement prévu.</h6>
+                        <p class="text-4xs text-secondary m-0">Pas d'activité programmée pour ce mois.</p>
+                    `;
+                    monthListDiv.appendChild(emptyState);
+
+                    document.getElementById("selectedDayHeader").innerText = "📆 Aucun événement prévu.";
+                    document.getElementById("dayEventsList").innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-calendar-minus fa-3x text-warning text-opacity-30 mb-3 d-block"></i>
+                            <h6 class="fw-bold text-dark text-xs mb-1">📆 Aucun événement prévu.</h6>
+                            <p class="text-3xs text-secondary m-0">Il n'y a pas d'activité planifiée.</p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById("selectedDayHeader").innerText = "Sélectionnez un jour sur le calendrier pour voir les détails.";
+                    document.getElementById("dayEventsList").innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-hand-pointer fa-3x text-primary text-opacity-35 mb-3 d-block"></i>
+                            <p class="text-xs m-0">Cliquez sur une date du calendrier pour examiner les détails des manifestations scientifiques de ce jour-là.</p>
+                        </div>
+                    `;
+
+                    // Sort by date ascending
+                    const sortedMonthEvents = [...monthEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    sortedMonthEvents.forEach(e => {
+                        const colors = getEventColors(e.type);
+                        const item = document.createElement("div");
+                        item.className = "p-3 bg-white border border-light-subtle rounded-3 text-xs cursor-pointer shadow-3xs mb-2 transition-all d-flex align-items-start gap-2.5";
+                        item.style.borderLeft = `4px solid ${colors.primary}`;
+                        
+                        let typeLabel = e.type;
+                        if (e.type === 'CONFERENCE') typeLabel = 'Conférence';
+                        else if (e.type === 'WORKSHOP') typeLabel = 'Workshop';
+                        else if (e.type === 'SEMINAR') typeLabel = 'Séminaire';
+                        else typeLabel = 'Autre';
+
+                        const eventDay = parseInt(e.date.split("-")[2], 10);
+                        item.innerHTML = `
+                            <div class="text-center font-mono bg-light rounded px-2 py-1 flex-shrink-0" style="min-width: 42px;">
+                                <span class="d-block fw-bold text-dark fs-6 lh-1">${eventDay}</span>
+                                <span class="text-3xs uppercase text-muted" style="font-size: 8px;">${monthNames[month].substring(0,3)}</span>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <span class="badge rounded-pill text-3xs px-2 py-0.5 mb-1" style="background-color: ${colors.bgLight}; color: ${colors.primary};">
+                                    <i class="${colors.icon} me-1"></i> ${typeLabel}
+                                </span>
+                                <strong class="text-dark d-block text-truncate text-xs">${e.title}</strong>
+                                <small class="text-secondary text-3xs d-block mt-0.5"><i class="fa-solid fa-location-dot me-1"></i> ${e.location}</small>
+                            </div>
+                        `;
+
+                        item.addEventListener("click", function() {
+                            showEventDetail(e);
+                        });
+                        monthListDiv.appendChild(item);
+                    });
+                }
+
+                // Render calendar days
+                for (let day = 1; day <= totalDays; day++) {
+                    if (row.children.length === 7) {
+                        grid.appendChild(row);
+                        row = document.createElement("tr");
+                    }
+
+                    const cell = document.createElement("td");
+                    cell.className = "position-relative py-2 bg-white valign-middle align-middle transition-all duration-200 hover-shadow";
+                    cell.style.height = "80px";
+                    cell.style.cursor = "pointer";
+
+                    const dayNumSpan = document.createElement("span");
+                    dayNumSpan.className = "fw-bold font-mono text-xs d-inline-block rounded-circle px-2 py-1";
+                    dayNumSpan.innerText = day;
+                    cell.appendChild(dayNumSpan);
+
+                    const dateStr = year + "-" + String(month + 1).padStart(2, '0') + "-" + String(day).padStart(2, '0');
+                    const matches = currentFilteredEvents.filter(e => e.date === dateStr);
+
+                    if (matches.length > 0) {
+                        // Color of the cell itself
+                        cell.classList.add("bg-warning", "bg-opacity-10", "border-warning");
+                        dayNumSpan.classList.add("bg-warning", "text-dark");
+
+                        const dotContainer = document.createElement("div");
+                        dotContainer.className = "d-flex flex-column gap-1 mt-1 px-1";
+                        
+                        matches.forEach(m => {
+                            const colors = getEventColors(m.type);
+                            const badge = document.createElement("span");
+                            badge.className = "badge text-start text-dark shadow-3xs border rounded d-block text-truncate py-0.5 px-1";
+                            badge.style.fontSize = "9px";
+                            badge.style.fontWeight = "500";
+                            badge.style.backgroundColor = colors.bgLight;
+                            badge.style.borderColor = colors.border;
+                            
+                            badge.innerHTML = `<span class="rounded-circle me-1" style="width: 5px; height: 5px; background-color: ${colors.primary}; display: inline-block;"></span>${m.title}`;
+                            dotContainer.appendChild(badge);
+                        });
+                        cell.appendChild(dotContainer);
+
+                        cell.addEventListener("click", function() {
+                            // Highlight cell
+                            document.querySelectorAll("#calendarGrid td").forEach(c => c.classList.remove("border-primary", "border-2"));
+                            cell.classList.add("border-primary", "border-2");
+
+                            const formattedDate = String(day).padStart(2, '0') + " " + monthNames[month] + " " + year;
+                            document.getElementById("selectedDayHeader").innerText = "📅 Événements du " + formattedDate;
+                            
+                            const listDiv = document.getElementById("dayEventsList");
+                            listDiv.innerHTML = "";
+                            
+                            matches.forEach(m => {
+                                listDiv.innerHTML += renderEventDetailHTML(m);
+                            });
+                        });
+                    } else {
+                        cell.addEventListener("click", function() {
+                            // Clear selections
+                            document.querySelectorAll("#calendarGrid td").forEach(c => c.classList.remove("border-primary", "border-2"));
+                            
+                            const formattedDate = String(day).padStart(2, '0') + " " + monthNames[month] + " " + year;
+                            document.getElementById("selectedDayHeader").innerText = "📅 " + formattedDate;
+                            
+                            const listDiv = document.getElementById("dayEventsList");
+                            listDiv.innerHTML = `
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-calendar-minus fa-3x text-warning text-opacity-30 mb-3 d-block"></i>
+                                    <h6 class="fw-bold text-dark text-xs mb-1">📆 Aucun événement prévu.</h6>
+                                    <p class="text-3xs text-secondary m-0">Pas de manifestation scientifique pour ce jour.</p>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    row.appendChild(cell);
+                }
+
+                // Fill remaining slots of the last row
+                while (row.children.length < 7) {
+                    const cell = document.createElement("td");
+                    cell.className = "bg-light text-muted text-opacity-25 border-light-subtle";
+                    cell.innerText = "";
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+
+            function showEventDetail(e) {
+                const parts = e.date.split("-");
+                const formattedDate = parts[2] + " " + monthNames[parseInt(parts[1], 10) - 1] + " " + parts[0];
+                document.getElementById("selectedDayHeader").innerText = "📅 Événement le " + formattedDate;
+                
+                const listDiv = document.getElementById("dayEventsList");
+                listDiv.innerHTML = renderEventDetailHTML(e);
+            }
+
+            // Month navigation events
+            document.getElementById("prevMonthBtn").addEventListener("click", function() {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            document.getElementById("nextMonthBtn").addEventListener("click", function() {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            document.getElementById("todayBtn").addEventListener("click", function() {
+                currentDate = new Date();
+                renderCalendar();
+            });
+
+            // Live filters
+            document.getElementById("calendarSearchInput").addEventListener("input", function(evt) {
+                searchQuery = evt.target.value.trim().toLowerCase();
+                renderCalendar();
+            });
+
+            document.getElementById("calendarTypeFilter").addEventListener("change", function(evt) {
+                typeFilter = evt.target.value;
+                renderCalendar();
+            });
+
+            // Initial render
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>

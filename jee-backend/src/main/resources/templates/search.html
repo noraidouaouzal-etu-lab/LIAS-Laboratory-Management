@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Recherche Globale - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Search Bar -->
+                <div class="card p-4 shadow-sm mb-4 border-0">
+                    <h3 class="fw-bold mb-3 text-primary" style="font-family: 'Plus Jakarta Sans', sans-serif;">🔍 Moteur de recherche global LIAS</h3>
+                    <p class="text-xs text-muted mb-4">Recherchez instantanément des chercheurs, publications, événements ou documents administratifs au sein du laboratoire.</p>
+                    <form th:action="@{/search}" method="get" class="d-flex gap-2">
+                        <input type="text" name="q" th:value="${query}" class="form-control form-control-lg text-sm" placeholder="Saisissez vos mots-clés... (ex: IoT, Alami, Conférence, Rapport)" required>
+                        <button type="submit" class="btn btn-warning px-4 fw-semibold">Rechercher</button>
+                    </form>
+                </div>
+
+                <!-- Query status -->
+                <div th:if="${query != null && !query.isEmpty()}" class="mb-4">
+                    <span class="text-sm text-secondary">Résultats pour la recherche : <strong class="text-dark" th:text="${query}"></strong></span>
+                </div>
+
+                <!-- Empty query or no results -->
+                <div th:if="${query == null || query.isEmpty()}" class="text-center py-5">
+                    <i class="fa-solid fa-compass display-1 text-muted opacity-25 mb-3"></i>
+                    <p class="text-secondary">Entrez un mot-clé ci-dessus pour lancer la recherche.</p>
+                </div>
+
+                <div th:if="${query != null && !query.isEmpty() && #lists.isEmpty(members) && #lists.isEmpty(documents) && #lists.isEmpty(events) && #lists.isEmpty(publications)}" class="card p-5 text-center border-0 shadow-sm">
+                    <i class="fa-solid fa-ban display-4 text-warning mb-3"></i>
+                    <h5 class="fw-bold">Aucun résultat trouvé.</h5>
+                    <p class="text-muted text-xs">Veuillez ajuster vos critères de recherche ou essayer un autre terme.</p>
+                </div>
+
+                <!-- Results sections -->
+                <div th:if="${query != null && !query.isEmpty()}">
+                    
+                    <!-- 1. Members -->
+                    <div th:if="${!#lists.isEmpty(members)}" class="card p-4 mb-4 border-0 shadow-sm">
+                        <h5 class="fw-bold text-sm text-uppercase text-secondary border-bottom pb-2 mb-3">👥 Chercheurs & Doctorants (<span th:text="${#lists.size(members)}"></span>)</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3" th:each="m : ${members}">
+                                <div class="p-3 bg-light rounded border border-secondary border-opacity-10">
+                                    <h6 class="fw-bold mb-1" th:text="${m.firstName + ' ' + m.lastName}">Nom</h6>
+                                    <p class="text-xs mb-1"><span class="badge bg-primary text-xs" th:text="${m.status}">STATUS</span></p>
+                                    <p class="text-xs text-muted mb-1">
+                                        <strong>Équipe :</strong> <span th:text="${m.team != null ? m.team.name : 'Aucune'}"></span>
+                                    </p>
+                                    <p class="text-xs text-muted mb-0">
+                                        <strong>Institution :</strong> <span th:text="${m.institution != null ? m.institution : 'Non spécifiée'}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Publications -->
+                    <div th:if="${!#lists.isEmpty(publications)}" class="card p-4 mb-4 border-0 shadow-sm">
+                        <h5 class="fw-bold text-sm text-uppercase text-secondary border-bottom pb-2 mb-3">📚 Publications Scientifiques (<span th:text="${#lists.size(publications)}"></span>)</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0 py-2.5" th:each="pub : ${publications}">
+                                <h6 class="fw-bold mb-1 text-xs" th:text="${pub.title}">Titre</h6>
+                                <p class="text-xs text-secondary mb-0">
+                                    Auteurs: <strong th:text="${pub.author}"></strong> | 
+                                    Année: <strong th:text="${pub.year}"></strong> | 
+                                    Équipe: <strong th:text="${pub.team != null ? pub.team : 'Non spécifiée'}"></strong>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 3. Events -->
+                    <div th:if="${!#lists.isEmpty(events)}" class="card p-4 mb-4 border-0 shadow-sm">
+                        <h5 class="fw-bold text-sm text-uppercase text-secondary border-bottom pb-2 mb-3">📅 Événements & Ateliers (<span th:text="${#lists.size(events)}"></span>)</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3" th:each="ev : ${events}">
+                                <div class="p-3 bg-light rounded border">
+                                    <span class="badge bg-success text-xs mb-2" th:text="${ev.type}">Type</span>
+                                    <h6 class="fw-bold mb-1" th:text="${ev.title}">Titre</h6>
+                                    <div class="d-flex justify-content-between text-xs text-secondary mt-2">
+                                        <span>📍 <span th:text="${ev.location}"></span></span>
+                                        <span>📆 <span th:text="${ev.date}"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Documents -->
+                    <div th:if="${!#lists.isEmpty(documents)}" class="card p-4 border-0 shadow-sm">
+                        <h5 class="fw-bold text-sm text-uppercase text-secondary border-bottom pb-2 mb-3">📂 Documents et Archives (<span th:text="${#lists.size(documents)}"></span>)</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0 py-2.5 d-flex justify-content-between align-items-center" th:each="doc : ${documents}">
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-xs" th:text="${doc.name}">Nom</h6>
+                                    <span class="badge bg-secondary font-mono text-uppercase" th:text="${doc.type}" style="font-size: 9px;">Type</span>
+                                </div>
+                                <span class="text-xs text-muted" th:text="${doc.dateUpload != null ? #temporals.format(doc.dateUpload, 'dd/MM/yyyy HH:mm') : ''}">Date</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

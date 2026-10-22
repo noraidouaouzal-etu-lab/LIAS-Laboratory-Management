@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('Procès-Verbaux (PV) - LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar dynamically loaded based on user's role -->
+            <div th:replace="~{fragments :: sidebar-dynamic('pv')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📝 Procès-Verbaux (PV) & Décisions de Réunion du Laboratoire</h1>
+                </div>
+
+                <!-- Response Alert Notifications -->
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                     Fiche de Procès-Verbal formalisée, indexée et décisions sauvegardées.
+                </div>
+                <div th:if="${param.deleted}" class="alert alert-danger py-2 text-xs">
+                     Procès-Verbal supprimé de l'historique de la direction.
+                </div>
+                <div th:if="${param.approved}" class="alert alert-success py-2 text-xs">
+                     Procès-Verbal approuvé avec succès !
+                </div>
+                <div th:if="${param.rejected}" class="alert alert-warning py-2 text-xs">
+                     Procès-Verbal marqué comme rejeté.
+                </div>
+                <div th:if="${param.archived}" class="alert alert-secondary py-2 text-xs">
+                     Statut d'archivage mis à jour avec succès.
+                </div>
+
+                <!-- Create PV Form (Only for Director) -->
+                <div th:if="${isDirector}" class="card p-4 mb-4 border border-secondary border-opacity-10 shadow-sm">
+                    <h5 class="fw-bold text-xs uppercase mb-3 text-primary">Consigner un nouveau PV de Réunion / Conseil</h5>
+                    <form th:action="@{/director/pv/save}" method="post" th:object="${newMeeting}" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Sujet / Titre de la Réunion</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Conseil de laboratoire - Session d'Automne" th:field="*{title}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Rédacteur (Nom complet)</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Pr. Abdelouahad ENNASSIRI" th:field="*{writer}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Nature de Réunion</label>
+                                <select class="form-select form-select-sm text-xs" th:field="*{type}" required>
+                                    <option value="Conseil de Labo">🏛️ Conseil de Laboratoire</option>
+                                    <option value="Réunion d'équipe">👥 Réunion d'équipe de recherche</option>
+                                    <option value="Réunion thématique">🔬 Réunion thématique</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Lieu de Réunion</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Salle de conférence B ou En ligne" th:field="*{location}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Date réunion</label>
+                                <input type="date" class="form-control form-control-sm text-xs font-mono" th:field="*{date}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Fichier Scan PDF lié</label>
+                                <input type="file" name="pvFile" class="form-control form-control-sm text-xs" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Ordre du Jour (Agenda)</label>
+                                <textarea class="form-control form-control-sm text-xs" rows="3" placeholder="Insérer l'ordre du jour officiel de la convocation..." th:field="*{agenda}" required></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Décisions prises & Résolutions de la Séance</label>
+                                <textarea class="form-control form-control-sm text-xs" rows="3" placeholder="Lister les résolutions approuvées et décisions prises..." th:field="*{decisions}"></textarea>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary btn-sm text-xs fw-bold">💾 Acter & Enregistrer le PV</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Search Panel -->
+                <div class="card p-3 mb-4 shadow-sm">
+                    <form th:action="${isDirector} ? @{/director/pv} : @{/member/pv}" method="get" class="row g-2 align-items-center">
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" name="search" th:value="${search}" class="form-control form-control-sm border-start-0" placeholder="Rechercher par titre ou ordre du jour (agenda)...">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm px-3 flex-grow-1">🔍 Rechercher</button>
+                            <a th:href="${isDirector} ? @{/director/pv} : @{/member/pv}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i></a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PV Actifs Section -->
+                <div class="card p-3 mb-4 shadow-sm border-start border-4 border-success">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-xs uppercase text-success m-0">📁 PV actifs</h5>
+                        <span class="badge bg-success" th:text="${#lists.size(activeMeetings)} + ' actif(s)'">0 actifs</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sujet / Réunion</th>
+                                    <th>Nature officiel</th>
+                                    <th>Date réunion</th>
+                                    <th>Lieu</th>
+                                    <th>Rédacteur</th>
+                                    <th>Ordre du Jour / Agenda</th>
+                                    <th>Décisions arrêtées</th>
+                                    <th>Date d'import</th>
+                                    <th>Fichier PDF</th>
+                                    <th>Statut</th>
+                                    <th th:if="${isDirector}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="meet : ${activeMeetings}">
+                                    <td class="fw-bold text-dark text-wrap" th:text="${meet.title}">Réunion de validation</td>
+                                    <td>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary text-2xs uppercase border border-primary border-opacity-20" th:text="${meet.type}">CONSEIL</span>
+                                    </td>
+                                    <td class="font-mono text-dark" th:text="${meet.date}">2026-06-17</td>
+                                    <td class="text-secondary" th:text="${meet.location != null && !#strings.isEmpty(meet.location) ? meet.location : 'Non spécifié'}">Salle de réunion</td>
+                                    <td class="font-sans text-secondary" th:text="${meet.writer}">Pr. Abdelouahad ENNASSIRI</td>
+                                    <td class="text-secondary text-wrap" th:text="${meet.agenda}">Ordre du jour...</td>
+                                    <td class="text-success text-wrap fw-bold" th:text="${meet.decisions != null && !#strings.isEmpty(meet.decisions) ? meet.decisions : 'Aucune décision'}">Décisions de la séance</td>
+                                    <td class="font-mono text-muted text-2xs" th:text="${meet.uploadDate != null ? #temporals.format(meet.uploadDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-06-17 11:30</td>
+                                    <td>
+                                        <a th:href="@{/pv/download/{id}(id=${meet.id})}" class="btn btn-outline-secondary btn-2sm text-xs font-mono py-0 px-2" th:if="${meet.filePath != null}">
+                                            📥 <span th:text="${meet.fileName != null && !#strings.isEmpty(meet.fileName) ? meet.fileName : 'PV_Lab.pdf'}">PV_Lab.pdf</span>
+                                        </a>
+                                        <span th:unless="${meet.filePath != null}" class="text-xs text-muted font-mono" th:text="${meet.fileName != null && !#strings.isEmpty(meet.fileName) ? meet.fileName : 'Aucun fichier'}">Aucun</span>
+                                    </td>
+                                    <td>
+                                        <span th:class="${'badge ' + (meet.status == 'APPROVED' ? 'bg-success' : (meet.status == 'REJECTED' ? 'bg-danger' : 'bg-warning'))}" 
+                                              th:text="${meet.status != null ? meet.status : 'PENDING'}">PENDING</span>
+                                    </td>
+                                    <td th:if="${isDirector}">
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <div th:if="${meet.status == null || meet.status == 'PENDING'}" class="d-flex gap-1">
+                                                <form th:action="@{/director/pv/approve/{id}(id=${meet.id})}" method="post" class="m-0">
+                                                    <button type="submit" class="btn btn-success btn-xs py-0 px-1 font-semibold" style="font-size: 11px;" title="Approuver">✅</button>
+                                                </form>
+                                                <form th:action="@{/director/pv/reject/{id}(id=${meet.id})}" method="post" class="m-0">
+                                                    <button type="submit" class="btn btn-danger btn-xs py-0 px-1 font-semibold" style="font-size: 11px;" title="Rejeter">❌</button>
+                                                </form>
+                                            </div>
+                                            <form th:action="@{/director/pv/archive/{id}(id=${meet.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-outline-warning btn-xs py-0 px-2 font-semibold text-dark" style="font-size: 11px;" title="Archiver">🔒</button>
+                                            </form>
+                                            <form th:action="@{/director/pv/delete/{id}(id=${meet.id})}" method="post" onsubmit="return confirm('Vouliez-vous vraiment supprimer ce PV?');" class="m-0">
+                                                <button type="submit" class="btn btn-outline-danger btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Supprimer">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(activeMeetings)}">
+                                    <td colspan="11" class="text-center text-muted py-4 text-italic">
+                                        Aucun procès-verbal enregistré.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PV Archivés Section -->
+                <div class="card p-3 shadow-sm border-start border-4 border-secondary">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-xs uppercase text-secondary m-0">🔒 PV archivés</h5>
+                        <span class="badge bg-secondary" th:text="${#lists.size(archivedMeetings)} + ' archivé(s)'">0 archivés</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sujet / Réunion</th>
+                                    <th>Nature officiel</th>
+                                    <th>Date réunion</th>
+                                    <th>Lieu</th>
+                                    <th>Rédacteur</th>
+                                    <th>Ordre du Jour / Agenda</th>
+                                    <th>Décisions arrêtées</th>
+                                    <th>Date d'import</th>
+                                    <th>Fichier PDF</th>
+                                    <th>Statut</th>
+                                    <th th:if="${isDirector}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="meet : ${archivedMeetings}">
+                                    <td class="fw-bold text-dark text-wrap text-muted" th:text="${meet.title}">Réunion de validation</td>
+                                    <td>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-2xs uppercase border border-secondary border-opacity-20" th:text="${meet.type}">CONSEIL</span>
+                                    </td>
+                                    <td class="font-mono text-muted" th:text="${meet.date}">2026-06-17</td>
+                                    <td class="text-secondary" th:text="${meet.location != null && !#strings.isEmpty(meet.location) ? meet.location : 'Non spécifié'}">Salle de réunion</td>
+                                    <td class="font-sans text-secondary" th:text="${meet.writer}">Pr. Abdelouahad ENNASSIRI</td>
+                                    <td class="text-secondary text-wrap" th:text="${meet.agenda}">Ordre du jour...</td>
+                                    <td class="text-muted text-wrap" th:text="${meet.decisions != null && !#strings.isEmpty(meet.decisions) ? meet.decisions : 'Aucune décision'}">Décisions de la séance</td>
+                                    <td class="font-mono text-muted text-2xs" th:text="${meet.uploadDate != null ? #temporals.format(meet.uploadDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">2026-06-17 11:30</td>
+                                    <td>
+                                        <a th:href="@{/pv/download/{id}(id=${meet.id})}" class="btn btn-outline-secondary btn-2sm text-xs font-mono py-0 px-2" th:if="${meet.filePath != null}">
+                                            📥 <span th:text="${meet.fileName != null && !#strings.isEmpty(meet.fileName) ? meet.fileName : 'PV_Lab.pdf'}">PV_Lab.pdf</span>
+                                        </a>
+                                        <span th:unless="${meet.filePath != null}" class="text-xs text-muted font-mono" th:text="${meet.fileName != null && !#strings.isEmpty(meet.fileName) ? meet.fileName : 'Aucun fichier'}">Aucun</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="${meet.status != null ? meet.status : 'PENDING'}">PENDING</span>
+                                    </td>
+                                    <td th:if="${isDirector}">
+                                        <div class="d-flex gap-1 align-items-center">
+                                            <form th:action="@{/director/pv/archive/{id}(id=${meet.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-outline-success btn-xs py-0 px-2 font-semibold text-dark" style="font-size: 11px;" title="Désarchiver">🔓</button>
+                                            </form>
+                                            <form th:action="@{/director/pv/delete/{id}(id=${meet.id})}" method="post" onsubmit="return confirm('Vouliez-vous vraiment supprimer ce PV?');" class="m-0">
+                                                <button type="submit" class="btn btn-outline-danger btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Supprimer">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(archivedMeetings)}">
+                                    <td colspan="11" class="text-center text-muted py-4 text-italic">
+                                        Aucun procès-verbal enregistré.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

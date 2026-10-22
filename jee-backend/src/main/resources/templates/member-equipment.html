@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Équipements & Composants - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-dynamic('equipment')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🛠️ Mes Équipements de Recherche & Logistique</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Demande de matériel enregistrée avec succès. En attente de validation du Directeur.
+                </div>
+                <div th:if="${param.error == 'cahier_not_allowed'}" class="alert alert-danger py-2 text-xs">
+                    Erreur : Les doctorants et associés ne sont pas autorisés à demander du matériel s'ils n'y sont pas habilités par le Cahier des Charges.
+                </div>
+
+                <div class="row">
+                    <!-- Form of requests -->
+                    <div class="col-md-5 mb-4" th:if="${member != null and member.status == 'PERMANENT'}">
+                        <div class="card p-4">
+                            <h5 class="fw-bold text-xs uppercase mb-3">Saisir une demande de matériel</h5>
+                            <p class="text-xs text-muted mb-4">Besoin d'un ordinateur GPU, d'une carte d'expérimentation ou matériel IoT ? Soumettez votre requête logistique.</p>
+                            <form th:action="@{/member/equipment/request}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Désignation du matériel désiré</label>
+                                    <input type="text" name="equipmentName" class="form-control form-control-sm text-xs" placeholder="ex: Nvidia Jetson Nano, Capteur Ultrasons" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Quantité nécessaire</label>
+                                    <input type="number" name="quantity" class="form-control form-control-sm text-xs" value="1" min="1" required>
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold py-2 mt-2 text-dark">🚀 Envoyer la demande au Directeur</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Disabled Form of requests for non-Permanent -->
+                    <div class="col-md-5 mb-4" th:if="${member == null or member.status != 'PERMANENT'}">
+                        <div class="card p-4 border border-danger-subtle bg-danger-subtle bg-opacity-10">
+                            <h5 class="fw-bold text-xs uppercase text-danger mb-3">❌ Demande d'Équipement Bloquée</h5>
+                            <p class="text-xs text-muted mb-0">Seuls les enseignants-chercheurs permanents ("PERMANENT") sont habilités à soumettre des demandes officielles d'équipements de recherche ou logistiques. Les doctorants et chercheurs associés doivent s'adresser à leur encadrant permanent.</p>
+                        </div>
+                    </div>
+
+                    <!-- Current allocations -->
+                    <div class="col-md-7 mb-4">
+                        <!-- My actual assignments -->
+                        <div class="card p-4 mb-4">
+                            <h5 class="fw-bold text-xs uppercase text-success mb-3">🟢 Mes matériels attribués</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 text-xs">
+                                    <thead>
+                                        <tr>
+                                            <th>Description</th>
+                                            <th>Date d'affectation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="asg : ${assignments}">
+                                            <td class="fw-bold text-dark" th:text="${asg.equipment != null ? asg.equipment.name : 'Matériel'}">Nvidia jetson</td>
+                                            <td th:text="${asg.distributionDate}">Date</td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(assignments)}">
+                                            <td colspan="2" class="text-center text-muted py-3">Aucun matériel ne vous est actuellement attribué.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- My history of requests -->
+                        <div class="card p-4">
+                            <h5 class="fw-bold text-xs uppercase text-secondary mb-3">📋 Suivi de mes requêtes logistiques</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 text-xs text-secondary">
+                                    <thead>
+                                        <tr>
+                                            <th>Matériel</th>
+                                            <th>Quantité</th>
+                                            <th>Date de demande</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="req : ${requests}">
+                                            <td th:text="${req.equipmentName}">Nvidia</td>
+                                            <td th:text="${req.quantity}">1</td>
+                                            <td th:text="${req.requestDate}">Date</td>
+                                            <td>
+                                                <span th:class="${'badge ' + (req.status == 'APPROVED' ? 'bg-success' : (req.status == 'REJECTED' ? 'bg-danger' : 'bg-warning'))}" th:text="${req.status}">STATUS</span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(requests)}">
+                                            <td colspan="4" class="text-center text-muted py-3">Aucune demande logistique archivée.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

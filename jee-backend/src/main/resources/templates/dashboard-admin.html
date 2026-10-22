@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Espace Administration - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-admin('dashboard')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="univ-title pb-1"><i class="fa-solid fa-sliders text-primary me-2"></i> Administration Système LIAS</h1>
+                    <span class="text-secondary small font-monospace">Administrateur Principal</span>
+                </div>
+
+                <!-- Professional Profile Greeting Block (Requirement 2) -->
+                <div class="card p-3 mb-4 bg-white border border-opacity-10 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img th:src="${currentUserMember != null && currentUserMember.id != null ? '/profile/photo/' + currentUserMember.id : '/images/default-avatar.png'}" 
+                                 alt="Photo de profil" class="profile-avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <h4 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif; font-size: 1.15rem;">
+                                    <span th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Administrateur'}">Administrateur</span>
+                                </h4>
+                                <div class="text-xs text-muted mt-1">
+                                    <span class="badge bg-danger bg-opacity-10 text-danger text-uppercase">ADMIN</span>
+                                    <span class="ms-2" th:text="${currentUserMember != null ? currentUserMember.email : 'admin@lias.com'}">admin@lias.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/profile" class="btn btn-outline-secondary btn-sm fw-semibold text-xs py-2 px-3">👤 Modifier profil</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="card p-4">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-family: Georgia, serif;">Outils d'Infrastructure et Contrôles de Sécurité</h5>
+                            <p class="text-secondary leading-relaxed">
+                                Bienvenue sur la plateforme consolidée de gestion des habilitations de sécurité du laboratoire LIAS. Cet espace technique permet de provisionner les comptes d'accès universitaires pour les enseignants et les jeunes doctorants, d'activer ou de forcer la mise en veille de sessions suspectes ou expirées, de réajuster les variables injectées de connexion Hibernate JDBC, et de consulter l'audit trail logs des opérations cruciales de gouvernance.
+                            </p>
+                            
+                            <hr class="my-3">
+
+                            <h6 class="fw-bold text-xs uppercase mb-2 text-dark">Raccourcis Administrateur Système</h6>
+                            <div class="d-flex flex-wrap gap-2 pt-1">
+                                <a href="/admin/users" class="btn btn-primary btn-sm px-3">👥 Gérer les comptes de connexion</a>
+                                <a href="/admin/config" class="btn btn-outline-primary btn-sm px-3">⚙️ Configurer l'environnement Spring Boot</a>
+                                <a href="/admin/logs" class="btn btn-outline-primary btn-sm px-3">📜 Analyser les logs d'audit trail</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="card p-3 mb-3 bg-light border">
+                            <h6 class="fw-bold text-xs uppercase mb-2 text-dark">🗄️ État SQL & Hibernate Dialect</h6>
+                            <div class="text-xs text-secondary leading-normal">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">🔌 <strong>Statut Connecteur :</strong> Connecté</li>
+                                    <li class="mb-2">📊 <strong>Base MySQL :</strong> <code>lias_db</code></li>
+                                    <li class="mb-2">⚡ <strong>Taille Pool Hikari :</strong> 10 Actifs</li>
+                                    <li>🔧 <strong>Spring Security :</strong> Filtrage Actif</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

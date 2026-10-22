@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Espace Chercheur - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-member('dashboard')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="univ-title pb-1"><i class="bi bi-mortarboard-fill text-primary me-2"></i> Espace Enseignant-Chercheur Permanent</h1>
+                    <span class="text-secondary small font-monospace">Statut : Membre Permanent</span>
+                </div>
+
+                <!-- Professional Profile Greeting Block (Requirement 2) -->
+                <div class="card p-3 mb-4 bg-white border border-opacity-10 shadow-sm">
+                    <div class="d-flex align-items-center gap-3">
+                        <img th:src="${currentUserMember != null && currentUserMember.id != null ? '/profile/photo/' + currentUserMember.id : '/images/default-avatar.png'}" 
+                             alt="Photo de profil" class="profile-avatar">
+                        <div>
+                            <h4 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif; font-size: 1.15rem;">
+                                Bienvenue, Pr. <span th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Permanent'}">Permanent</span>
+                            </h4>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="badge bg-success bg-opacity-10 text-success text-uppercase" th:text="${currentUserMember != null && currentUserMember.status != null ? currentUserMember.status : 'PERMANENT'}">PERMANENT</span>
+                                <span class="ms-2" th:text="${currentUserMember != null ? currentUserMember.email : 'member@lias.com'}">member@lias.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 mb-4">
+                        <div class="card p-4">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-family: Georgia, serif;">Bienvenue, cher Professeur</h5>
+                            <p class="text-secondary leading-relaxed">
+                                Le portail de recherche du <strong>Laboratoire LIAS</strong> centralise vos activités académiques. Cet espace réservé vous permet de déclarer vos projets de recherche, d'encadrer vos doctorants thésards, d'accéder aux syllabus pédagogiques approuvés et de diffuser des notes internes directement aux équipes de recherche.
+                            </p>
+                            
+                            <hr class="my-3">
+
+                            <div class="row text-center text-md-start text-xs">
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-uppercase text-muted fw-bold pb-1 m-0">Équipe de Recherche Principale</h6>
+                                    <p class="fw-bold fs-6 text-primary" th:text="${teamName}">Réseaux Sans Fil (RSF)</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-uppercase text-muted fw-bold pb-1 m-0">Doctorants sous supervision</h6>
+                                    <p class="fw-bold fs-6 text-dark" th:text="${doctorantsCount + ' Enregistrés'}">4 Enregistrés</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-uppercase text-muted fw-bold pb-1 m-0">Mes Publications LIAS</h6>
+                                    <p class="fw-bold fs-6 text-success" th:text="${myPublicationsCount + ' Articles indexés'}">18 Articles indexés</p>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <h6 class="text-uppercase text-muted fw-bold pb-1 m-0">Rôle de Conseil de Lab</h6>
+                                    <p class="fw-bold fs-6 text-secondary" th:text="${currentUserMember != null && 'PERMANENT'.equalsIgnoreCase(currentUserMember.status) ? 'Éligible Votant' : 'Consultatif'}">Éligible Votant</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3 text-dark text-sm border-bottom pb-2" style="font-family: Georgia, serif;"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> Tableau de bord & Raccourcis d'activités</h5>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4">
+                    <!-- My Profile Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                             <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-secondary"><i class="bi bi-person-circle text-primary me-1"></i> Mon Profil Académique</h6>
+                                <p class="text-2xs text-muted mb-2">Gérez vos thèmes de recherche, biographie, institution et informations de contact.</p>
+                            </div>
+                            <a href="/profile" class="btn btn-outline-primary btn-xs py-1.5 fw-bold text-center mt-2">👤 Modifier mon profil</a>
+                        </div>
+                    </div>
+
+                    <!-- My Publications Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-success"><i class="bi bi-book-half text-success me-1"></i> Mes Publications</h6>
+                                <p class="text-2xs text-muted mb-2">Déclarez de nouveaux articles indexés, chapitres d'ouvrages et brevets de recherche.</p>
+                            </div>
+                            <a href="/member/publications" class="btn btn-success btn-xs py-1.5 fw-bold text-center text-white mt-2">➕ Ajouter publication</a>
+                        </div>
+                    </div>
+
+                    <!-- Equipment Request Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-warning"><i class="bi bi-tools text-warning me-1"></i> Demandes de Matériel</h6>
+                                <p class="text-2xs text-muted mb-2">Soumettez des demandes de matériel expérimental IoT ou cartes GPU Nvidia Jetson.</p>
+                            </div>
+                            <a href="/member/equipment" class="btn btn-warning btn-xs py-1.5 fw-bold text-center text-dark mt-2">🛠️ Demander matériel</a>
+                        </div>
+                    </div>
+
+                    <!-- Events Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-info"><i class="bi bi-calendar-event text-info me-1"></i> Séminaires & Événements</h6>
+                                <p class="text-2xs text-muted mb-2">Consultez l'agenda des sessions de présentation d'équipe et de soutenances thèses.</p>
+                            </div>
+                            <a href="/member/events" class="btn btn-outline-info btn-xs py-1.5 fw-bold text-center mt-2">📅 Consulter les événements</a>
+                        </div>
+                    </div>
+
+                    <!-- Documents Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-secondary"><i class="bi bi-folder2-open text-secondary me-1"></i> Base Documentaire</h6>
+                                <p class="text-2xs text-muted mb-2">Accédez aux chartes éthiques, documents d'affiliations et modèles officiels.</p>
+                            </div>
+                            <a href="/member/documents" class="btn btn-outline-secondary btn-xs py-1.5 fw-bold text-center mt-2">📂 Accéder aux documents</a>
+                        </div>
+                    </div>
+
+                    <!-- Communication Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-danger"><i class="bi bi-chat-dots text-danger me-1"></i> Fils de Communication</h6>
+                                <p class="text-2xs text-muted mb-2">Échangez des informations scientifiques en temps réel avec les équipes de recherche.</p>
+                            </div>
+                            <a href="/communication" class="btn btn-outline-danger btn-xs py-1.5 fw-bold text-center mt-2">💬 Ouvrir les discussions</a>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Card -->
+                    <div class="col">
+                        <div class="card p-3 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-xs uppercase mb-2 text-dark"><i class="bi bi-bell-fill text-dark me-1"></i> Mes Notifications</h6>
+                                <p class="text-2xs text-muted mb-2">Consultez vos annonces institutionnelles, alertes matériels et validations d'articles.</p>
+                            </div>
+                            <a href="/notifications" class="btn btn-outline-dark btn-xs py-1.5 fw-bold text-center mt-2">🔔 Voir mes notifications</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

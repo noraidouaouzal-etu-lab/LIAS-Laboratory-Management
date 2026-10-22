@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Espace Direction - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('dashboard')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="univ-title pb-1"><i class="fa-solid fa-university text-primary me-2"></i> Pilotage de Direction Scientifique et Académique</h1>
+                    <span class="text-secondary small font-monospace" th:text="${currentUserMember != null ? 'Directeur : Pr. ' + ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Directeur : Non renseigné'}">Directeur : Pr. Abdelouahad ENNASSIRI</span>
+                </div>
+
+                <!-- Professional Profile Greeting Block (Requirement 2) -->
+                <div class="card p-3 mb-4 bg-white border border-opacity-10 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img th:src="${currentUserMember != null && currentUserMember.id != null ? '/profile/photo/' + currentUserMember.id : '/images/default-avatar.png'}" 
+                                 alt="Photo de profil" class="profile-avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            <div>
+                                <h4 class="fw-bold m-0 text-dark" style="font-family: Georgia, serif; font-size: 1.15rem;">
+                                    Pr. <span th:text="${currentUserMember != null ? ((currentUserMember.firstName != null ? currentUserMember.firstName : '') + ' ' + (currentUserMember.lastName != null ? currentUserMember.lastName : '')) : 'Abdelouahad ENNASSIRI'}">Abdelouahad ENNASSIRI</span>
+                                </h4>
+                                <div class="text-xs text-muted mt-1">
+                                    <span class="badge bg-warning bg-opacity-10 text-warning text-uppercase">DIRECTOR</span>
+                                    <span class="ms-2" th:text="${currentUserMember != null ? currentUserMember.email : 'director@lias.com'}">director@lias.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/profile" class="btn btn-outline-secondary btn-sm fw-semibold text-xs py-2 px-3">👤 Modifier profil</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simple Core Academic Metrics, avoiding overly modern visual widgets as requested -->
+                <div class="row text-center mb-4">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card p-3 bg-light border border-secondary border-opacity-20 d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <h6 class="text-xs text-uppercase text-secondary fw-bold mb-1">Effectifs Totaux</h6>
+                                <p class="fs-4 fw-bold m-0 text-primary" th:text="${membersCount}">3</p>
+                                <span style="font-size: 11px;" class="text-muted d-block mb-2">Membres Enregistrés</span>
+                            </div>
+                            <a href="/director/members" class="btn btn-outline-primary btn-xs py-1 text-2xs fw-bold">Voir les membres</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card p-3 bg-light border border-secondary border-opacity-20 d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <h6 class="text-xs text-uppercase text-secondary fw-bold mb-1">Publications Indexées</h6>
+                                <p class="fs-4 fw-bold m-0 text-success" th:text="${publicationsCount}">2</p>
+                                <span style="font-size: 11px;" class="text-muted d-block mb-2">Articles scientifiques</span>
+                            </div>
+                            <a href="/director/publications" class="btn btn-outline-success btn-xs py-1 text-2xs fw-bold">Voir les articles</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card p-3 bg-light border border-secondary border-opacity-20 d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <h6 class="text-xs text-uppercase text-secondary fw-bold mb-1">Agenda Actif</h6>
+                                <p class="fs-4 fw-bold m-0 text-info" th:text="${eventsCount}">2</p>
+                                <span style="font-size: 11px;" class="text-muted d-block mb-2">Séminaires et congrès</span>
+                            </div>
+                            <a href="/director/events" class="btn btn-outline-info btn-xs py-1 text-2xs fw-bold">Voir l'agenda</a>
+                        </div>
+                    </div>
+                     <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="card p-3 bg-light border border-secondary border-opacity-20 d-flex flex-column justify-content-between h-100">
+                            <div>
+                                <h6 class="text-xs text-uppercase text-secondary fw-bold mb-1">Demandes d'adhésion</h6>
+                                <p class="fs-4 fw-bold m-0 text-danger" th:text="${pendingCount}">1</p>
+                                <span style="font-size: 11px;" class="text-muted d-block mb-2">Dossiers de candidature en attente</span>
+                            </div>
+                            <a href="/director/adhesions" class="btn btn-outline-danger btn-xs py-1 text-2xs fw-bold">Demandes d'adhésion</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="card p-4">
+                            <h5 class="fw-bold mb-3 text-dark" style="font-family: Georgia, serif;">Instructions administratives prioritaires</h5>
+                            <p class="text-secondary leading-relaxed">
+                                En tant que directeur titulaire de la chaire de recherche du <strong>LIAS (Université Hassan II de Casablanca)</strong>, vous disposez du pouvoir institutionnel complet d'ordonnancement de l'annuaire des membres de recherche permanents, d'évaluation des candidatures doctorat initiées sur le portail d'adhésion du laboratoire, de diffusion souveraine de mandats stratégiques ou de directives scientifiques et de suivi budgétaire de l'acquisition des équipements du parc matériel.
+                            </p>
+                            
+                            <hr class="my-3">
+
+                            <h6 class="fw-bold text-xs uppercase mb-2 text-dark"><i class="fa-solid fa-gears text-primary me-1"></i> Raccourcis de Gouvernance et Direction</h6>
+                            <div class="d-flex flex-wrap gap-2 pt-1">
+                                <a href="/director/adhesions" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-envelope me-1"></i> Traiter les candidatures</a>
+                                <a href="/director/mandates" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-newspaper me-1"></i> Diffuser des directives</a>
+                                <a href="/director/equipment" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-screwdriver-wrench me-1"></i> Gérer l'inventaire matériel</a>
+                                <a href="/director/pv" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-file-signature me-1"></i> Enregistrer un Procès-Verbal</a>
+                                <a href="/director/conventions" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-handshake me-1"></i> Conventions de partenariat</a>
+                                <a href="/director/annual-report" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-chart-pie me-1"></i> Rapport Annuel Scientifique</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card p-3 bg-light border mb-3">
+                            <h6 class="fw-bold text-xs uppercase mb-2 text-dark"><i class="fa-solid fa-users text-primary me-1"></i> Conseil Scientifique - Sessions</h6>
+                            <p style="font-size: 12px;" class="text-secondary leading-relaxed">
+                                Le prochain conseil d'organisation pédagogique abordant les soutenances thèses de second semestre universitaire s'organisera à la salle des séminaires FSBM de Casablanca.
+                            </p>
+                            <a href="/director/governance" class="text-xs fw-bold text-decoration-none">Voir l'organigramme de gouvernance →</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

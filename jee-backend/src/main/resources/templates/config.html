@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Configuration Globale - Administration LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-admin('config')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">⚙️ Configuration Globale du Système LIAS</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Configuration système mise à jour avec succès !
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card p-4">
+                            <h5 class="fw-bold fs-6 mb-4">🔧 Paramètres de l'Application JEE & Base de Données</h5>
+                            <form action="/admin/config/save" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Nom de l'établissement principal</label>
+                                    <input type="text" class="form-control form-control-sm" name="establishment" value="Faculté des Sciences Ben M'Sik, Université Hassan II de Casablanca">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-xs fw-semibold">Port du serveur Spring Boot</label>
+                                        <input type="text" class="form-control form-control-sm" name="port" value="8080" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-xs fw-semibold">Taille max des fichiers uploadés</label>
+                                        <input type="text" class="form-control form-control-sm" name="upload_max" value="5MB">
+                                    </div>
+                                </div>
+
+                                <hr class="my-3">
+
+                                <h6 class="fw-bold mb-3 text-secondary">🗄️ Connexion Hibernate / MySQL Dialect</h6>
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Database Schema URL</label>
+                                    <input type="text" class="form-control form-control-sm" value="jdbc:mysql://localhost:3306/lias_db?useSSL=false" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Thymeleaf Cache Enabled</label>
+                                    <div class="form-check form-switch mt-1">
+                                        <input class="form-check-input" type="checkbox" id="thymeleafCache">
+                                        <label class="form-check-label text-xs text-muted" for="thymeleafCache">Actif (Désactivé par défaut en développement)</label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-sm px-4">Sauvegarder les paramètres</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card p-3 mb-3 bg-light">
+                            <h6 class="fw-bold text-dark mb-2">💡 Note administrative</h6>
+                            <p class="text-xs text-secondary leading-relaxed mb-0">
+                                Ces paramètres configurent directement les propriétés Spring Boot chargées depuis <code>application.properties</code> à l'initialisation du Bean de configuration contextuelle.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

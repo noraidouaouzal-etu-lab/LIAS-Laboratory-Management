@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Membres du Laboratoire - LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <span class="badge text-uppercase tracking-wider px-3 py-1.5 mb-2 text-white" style="background-color: var(--univ-gold); font-size: 11px;">Communauté Scientifique</span>
+            <h2 class="fw-bold text-dark" style="font-family: Georgia, serif;">👥 Membres et Chercheurs du LIAS</h2>
+            <p class="text-muted max-w-2xl mx-auto" style="font-size: 0.95rem;">
+                Découvrez l'équipe d'excellence du Laboratoire d'Informatique, Énergies et Aide à la Décision (LIAS).
+            </p>
+        </div>
+
+        <!-- Global Empty State -->
+        <div class="alert alert-info text-center py-5 shadow-sm border-0" th:if="${director == null && #lists.isEmpty(permanents) && #lists.isEmpty(associates) && #lists.isEmpty(doctorants)}" style="border-radius: 12px;">
+            <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary"></i>
+            <h4 class="fw-bold">Aucun membre disponible</h4>
+            <p class="text-secondary mb-0">La liste des membres du laboratoire est actuellement vide.</p>
+        </div>
+
+        <!-- 1. DIRECTION DU LABORATOIRE -->
+        <div class="mb-5" th:if="${director != null}">
+            <h3 class="fw-bold mb-4 pb-2 border-bottom text-dark" style="font-family: Georgia, serif;">
+                <i class="fa-solid fa-graduation-cap me-2 text-warning"></i> Direction du Laboratoire
+            </h3>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm p-4 d-flex flex-md-row align-items-center gap-4 hover-lift" style="border-radius: 12px !important; border-left: 5px solid var(--univ-gold) !important; background: linear-gradient(to right, #ffffff, #fdfbf7);">
+                        <img th:src="${director != null ? '/profile/photo/' + director.id : '/images/default-avatar.png'}" 
+                             alt="Photo Directeur" class="rounded-circle border shadow-sm flex-shrink-0" style="width: 110px; height: 110px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <span class="badge bg-warning bg-opacity-10 text-warning text-uppercase mb-2 px-2.5 py-1 fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">Directeur Fondateur</span>
+                            <h4 class="fw-bold text-dark mb-1" th:text="${director.firstName + ' ' + director.lastName}">Pr. Abdelouahad ENNASSIRI</h4>
+                            <p class="text-secondary small mb-2">
+                                <span class="fw-semibold text-primary" th:text="${director.institution != null ? director.institution : 'Faculté des Sciences Ben M-Sik'}">FSBM</span>
+                                <span class="mx-1">•</span>
+                                <span class="text-secondary" th:text="${'Équipe: ' + (director.team != null ? director.team.name : 'Aide à la Décision')}">Aide à la Décision</span>
+                            </p>
+                            <div class="mb-2" th:if="${director.interests != null && director.interests != ''}">
+                                <strong class="text-xs text-uppercase text-secondary d-block mb-1">Domaine de Recherche :</strong>
+                                <span class="badge bg-light text-secondary border px-2 py-1 small" th:text="${director.interests}">IA, Optimisation</span>
+                            </div>
+                            <div class="mt-3" th:if="${director.biography != null && director.biography != ''}">
+                                <strong class="text-xs text-uppercase text-secondary d-block mb-1">Biographie :</strong>
+                                <p class="text-secondary small mb-0 font-serif italic" style="line-height: 1.5;" th:text="${director.biography}">Biographie...</p>
+                            </div>
+                            <div class="mt-3 text-xs text-muted">
+                                <i class="fa-regular fa-envelope me-1"></i> <span th:text="${director.email}">director@lias-lab.ma</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ENSEIGNANTS-CHERCHEURS PERMANENTS -->
+        <div class="mb-5" th:if="${not #lists.isEmpty(permanents)}">
+            <h3 class="fw-bold mb-4 pb-2 border-bottom text-dark" style="font-family: Georgia, serif;">
+                <i class="fa-solid fa-user-tie me-2 text-primary"></i> Enseignants-Chercheurs Permanents
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" th:each="m : ${permanents}">
+                    <div class="card h-100 border-0 shadow-sm p-4 d-flex flex-column justify-content-between hover-lift" style="border-radius: 12px !important; border-top: 3px solid var(--univ-brand) !important;">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img th:src="${m != null ? '/profile/photo/' + m.id : '/images/default-avatar.png'}" 
+                                     alt="Avatar" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0" th:text="${m.firstName + ' ' + m.lastName}">Nom</h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase mt-1" style="font-size: 9px; letter-spacing: 0.5px;">Professeur Permanent</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-secondary small mb-3">
+                                <span class="fw-semibold text-slate-700" th:text="${m.institution != null ? m.institution : 'FSBM'}">FSBM</span>
+                                <span class="mx-1">•</span>
+                                <span th:text="${m.team != null ? m.team.name : 'Sans Équipe'}">Team</span>
+                            </p>
+
+                            <div class="mb-3" th:if="${m.interests != null && m.interests != ''}">
+                                <strong class="text-2xs text-uppercase text-secondary d-block mb-1" style="font-size: 10px;">Expertise :</strong>
+                                <span class="badge bg-light text-secondary border" style="font-size: 11px;" th:text="${m.interests}">Interests</span>
+                            </div>
+
+                            <div class="mb-3" th:if="${m.biography != null && m.biography != ''}">
+                                <p class="text-secondary small mb-0 text-truncate-3" style="font-size: 12.5px; line-height: 1.45;" th:text="${m.biography}">Biographie...</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top text-xs text-muted d-flex align-items-center justify-content-between">
+                            <span><i class="fa-regular fa-envelope me-1"></i> <span th:text="${m.email}">email@lias-lab.ma</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CHERCHEURS ASSOCIÉS -->
+        <div class="mb-5" th:if="${not #lists.isEmpty(associates)}">
+            <h3 class="fw-bold mb-4 pb-2 border-bottom text-dark" style="font-family: Georgia, serif;">
+                <i class="fa-solid fa-users-rectangle me-2 text-info"></i> Chercheurs Associés & Experts
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" th:each="m : ${associates}">
+                    <div class="card h-100 border-0 shadow-sm p-4 d-flex flex-column justify-content-between hover-lift" style="border-radius: 12px !important; border-top: 3px solid #06b6d4 !important;">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img th:src="${m != null ? '/profile/photo/' + m.id : '/images/default-avatar.png'}" 
+                                     alt="Avatar" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0" th:text="${m.firstName + ' ' + m.lastName}">Nom</h5>
+                                    <span class="badge bg-info bg-opacity-10 text-info text-uppercase mt-1" style="font-size: 9px; letter-spacing: 0.5px;">Chercheur Associé</span>
+                                </div>
+                            </div>
+
+                            <p class="text-secondary small mb-3">
+                                <span class="fw-semibold text-slate-700" th:text="${m.institution != null ? m.institution : 'Université Externe'}">Institution</span>
+                                <span class="mx-1">•</span>
+                                <span th:text="${m.team != null ? m.team.name : 'Sans Équipe'}">Team</span>
+                            </p>
+
+                            <div class="mb-3" th:if="${m.interests != null && m.interests != ''}">
+                                <strong class="text-2xs text-uppercase text-secondary d-block mb-1" style="font-size: 10px;">Intérêts :</strong>
+                                <span class="badge bg-light text-secondary border" style="font-size: 11px;" th:text="${m.interests}">Interests</span>
+                            </div>
+
+                            <div class="mb-3" th:if="${m.biography != null && m.biography != ''}">
+                                <p class="text-secondary small mb-0 text-truncate-3" style="font-size: 12.5px; line-height: 1.45;" th:text="${m.biography}">Biographie...</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top text-xs text-muted d-flex align-items-center justify-content-between">
+                            <span><i class="fa-regular fa-envelope me-1"></i> <span th:text="${m.email}">email@lias-lab.ma</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DOCTORANTS & CHERCHEURS EN THÈSE -->
+        <div class="mb-5" th:if="${not #lists.isEmpty(doctorants)}">
+            <h3 class="fw-bold mb-4 pb-2 border-bottom text-dark" style="font-family: Georgia, serif;">
+                <i class="fa-solid fa-user-graduate me-2 text-success"></i> Doctorants & Jeunes Chercheurs
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" th:each="m : ${doctorants}">
+                    <div class="card h-100 border-0 shadow-sm p-4 d-flex flex-column justify-content-between hover-lift" style="border-radius: 12px !important; border-top: 3px solid #10b981 !important;">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img th:src="${m != null ? '/profile/photo/' + m.id : '/images/default-avatar.png'}" 
+                                     alt="Avatar" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0" th:text="${m.firstName + ' ' + m.lastName}">Nom</h5>
+                                    <span class="badge bg-success bg-opacity-10 text-success text-uppercase mt-1" style="font-size: 9px; letter-spacing: 0.5px;">Doctorant</span>
+                                </div>
+                            </div>
+
+                            <p class="text-secondary small mb-3">
+                                <span class="fw-semibold text-slate-700" th:text="${m.institution != null ? m.institution : 'FSBM'}">FSBM</span>
+                                <span class="mx-1">•</span>
+                                <span th:text="${m.team != null ? m.team.name : 'Sans Équipe'}">Team</span>
+                            </p>
+
+                            <div class="mb-3" th:if="${m.interests != null && m.interests != ''}">
+                                <strong class="text-2xs text-uppercase text-secondary d-block mb-1" style="font-size: 10px;">Thématiques :</strong>
+                                <span class="badge bg-light text-secondary border" style="font-size: 11px;" th:text="${m.interests}">Interests</span>
+                            </div>
+
+                            <div class="mb-3" th:if="${m.biography != null && m.biography != ''}">
+                                <p class="text-secondary small mb-0 text-truncate-3" style="font-size: 12.5px; line-height: 1.45;" th:text="${m.biography}">Biographie...</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top text-xs text-muted d-flex align-items-center justify-content-between">
+                            <span><i class="fa-regular fa-envelope me-1"></i> <span th:text="${m.email}">email@lias-lab.ma</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra CSS style for truncation and lifts -->
+    <style>
+        .hover-lift {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+        .text-truncate-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+    </style>
+</body>
+</html>

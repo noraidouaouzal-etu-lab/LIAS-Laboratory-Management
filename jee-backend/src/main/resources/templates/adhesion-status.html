@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Suivi de demande d\'adhésion - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card p-5 border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="text-center mb-4">
+                        <div th:replace="~{fragments :: fsbm-logo('light')}" class="mx-auto mb-3" style="max-width: 150px;"></div>
+                        <h3 class="fw-bold text-dark" style="font-family: 'Plus Jakarta Sans', sans-serif;">Suivi de demande d'Adhésion</h3>
+                        <p class="text-xs text-secondary">Saisissez votre e-mail pour vérifier l'état de votre candidature au laboratoire.</p>
+                    </div>
+
+                    <!-- Search Form -->
+                    <form th:action="@{/adhesion-status}" method="get" class="mb-4">
+                        <div class="input-group">
+                            <input type="email" name="email" class="form-control form-control-sm text-xs" 
+                                   th:value="${email}" placeholder="Saisissez votre e-mail académique..." required>
+                            <button type="submit" class="btn btn-primary text-xs fw-bold">🔍 Rechercher</button>
+                        </div>
+                    </form>
+
+                    <!-- Search Result Section -->
+                    <div th:if="${searched}">
+                        <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger text-xs py-3 text-center" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                            <span th:text="${error}">Erreur</span>
+                        </div>
+
+                        <!-- Adhesion Request Found -->
+                        <div th:if="${adhesionRequest}" class="border rounded p-4 bg-white shadow-xs">
+                            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                                <i class="fa-solid fa-address-card me-2 text-primary"></i> 
+                                <span>Suivi de Candidature / Tracking Details</span>
+                            </h5>
+                            
+                            <div class="mb-2">
+                                <span class="text-xs fw-bold text-uppercase text-secondary">Nom :</span>
+                                <span class="text-sm text-dark ms-1" th:text="${adhesionRequest.firstName != null && adhesionRequest.firstName != '' ? (adhesionRequest.firstName + ' ' + (adhesionRequest.lastName != null ? adhesionRequest.lastName : '')) : adhesionRequest.name}">Nom</span>
+                            </div>
+
+                            <div class="mb-2">
+                                <span class="text-xs fw-bold text-uppercase text-secondary">Email :</span>
+                                <span class="text-sm font-monospace text-dark ms-1" th:text="${adhesionRequest.email}">email@univ.ma</span>
+                            </div>
+
+                            <div class="mb-2">
+                                <span class="text-xs fw-bold text-uppercase text-secondary">Role demandé :</span>
+                                <span class="badge bg-secondary text-xs ms-1" th:text="${adhesionRequest.requestedRole}">DOCTORANT</span>
+                            </div>
+
+                            <div class="mb-4 border-top pt-3">
+                                <span class="text-xs fw-bold text-uppercase text-secondary d-block mb-2">Status / Statut de la demande :</span>
+                                
+                                <!-- PENDING -->
+                                <div th:if="${adhesionRequest.status == 'PENDING'}" class="alert alert-warning py-3 text-center mb-0">
+                                    <h5 class="fw-bold text-warning mb-1"><i class="fa-solid fa-hourglass-half me-1"></i> PENDING</h5>
+                                    <p class="text-xs mb-0 text-dark">
+                                        Votre demande a été envoyée au directeur du laboratoire.<br>
+                                        Your adhesion request is being validated by the laboratory director.
+                                    </p>
+                                </div>
+
+                                <!-- ACCEPTED -->
+                                <div th:if="${adhesionRequest.status == 'ACCEPTED'}">
+                                    <div class="alert alert-success py-3 text-center mb-3">
+                                        <h5 class="fw-bold text-success mb-1"><i class="fa-solid fa-circle-check me-1"></i> ACCEPTED (ACCEPTÉE)</h5>
+                                        <p class="text-xs mb-3 text-dark">
+                                            Votre demande d'adhésion a été acceptée. Votre compte a été créé.<br>
+                                            Your LIAS adhesion request has been accepted. Your account has been created.
+                                        </p>
+                                    </div>
+
+                                    <!-- Credentials Notification Card -->
+                                    <div th:if="${adhesionNotification}" class="card border border-success bg-white p-3 mb-3 text-start" style="border-radius: 8px; border-style: dashed !important;">
+                                        <h6 class="text-success fw-bold text-xs mb-2"><i class="fa-solid fa-key me-1"></i> Informations de Connexion :</h6>
+                                        <div class="text-xs text-dark bg-light p-2.5 rounded border" style="white-space: pre-line; line-height: 1.6;" th:text="${adhesionNotification.message}">
+                                            Notification details...
+                                        </div>
+                                    </div>
+
+                                    <a href="/login" class="btn btn-success btn-sm fw-bold w-100 text-xs mb-2">
+                                        <i class="fa-solid fa-right-to-bracket me-1"></i> Aller à la page de Connexion / Go to Login
+                                    </a>
+                                </div>
+
+                                <!-- REJECTED -->
+                                <div th:if="${adhesionRequest.status == 'REJECTED'}" class="alert alert-danger py-3 text-center mb-0">
+                                    <h5 class="fw-bold text-danger mb-1"><i class="fa-solid fa-circle-xmark me-1"></i> REJECTED (REFUSÉE)</h5>
+                                    <p class="text-xs mb-0 text-dark">
+                                        Votre demande d'adhésion a été refusée.<br>
+                                        Your LIAS adhesion request has been rejected.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4 border-top pt-3">
+                        <a href="/home" class="text-xs text-decoration-none text-muted">← Retour à l'accueil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

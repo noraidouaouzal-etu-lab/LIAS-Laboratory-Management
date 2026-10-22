@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Gestion des Équipes - Direction LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('teams')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🏛️ Gestion des Équipes de Recherche Académique (Directeur Uniquement)</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Équipe de recherche enregistrée avec succès !
+                </div>
+                <div th:if="${param.deleted}" class="alert alert-danger py-2 text-xs">
+                    Équipe désindexée du laboratoire avec succès.
+                </div>
+
+                <div class="row">
+                    <!-- Form for creating teams -->
+                    <div class="col-md-4">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm">
+                            <h5 class="fw-bold text-xs uppercase mb-3 text-primary">Inaugurer une Équipe</h5>
+                            <form th:action="@{/director/teams/save}" method="post" th:object="${newTeam}">
+                                <div class="mb-3">
+                                    <label class="form-label text-2xs uppercase fw-bold text-muted">Nom de l'équipe (Doit correspondre aux publications)</label>
+                                    <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Aide à la Décision" th:field="*{name}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-2xs uppercase fw-bold text-muted">Axe de recherche & Description</label>
+                                    <textarea class="form-control form-control-sm text-xs" rows="4" placeholder="Objectifs et thématiques majeures..." th:field="*{description}" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100 text-xs fw-bold">🚀 Créer l'Axe de Recherche</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- List of teams & Advanced Publication rates statistics -->
+                    <div class="col-md-8">
+                        <div class="card p-3 shadow-sm border border-secondary border-opacity-10 h-100">
+                            <h5 class="fw-bold text-xs uppercase text-secondary mb-3">🔥 Cadre Structurel & Taux de Publication Académique</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover text-xs mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nom de l'équipe</th>
+                                            <th>Description académique</th>
+                                            <th class="text-center">Publications actives</th>
+                                            <th class="text-center">Taux par chercheur</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="t : ${teams}">
+                                            <td class="fw-bold text-dark font-sans" th:text="${t.name}">Équipe 1</td>
+                                            <td class="text-muted text-wrap" th:text="${t.description}">Description...</td>
+                                            <td class="text-center fw-bold text-primary font-mono" th:text="${teamPubCounts.get(t.id)}">3</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success bg-opacity-10 text-success fw-bold font-mono" 
+                                                      th:text="${#numbers.formatDecimal(publicationRates.get(t.id), 1, 2) + ' pub/chercheur'}">
+                                                    0.5 pub/chercheur
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a th:href="@{/director/teams/delete/{id}(id=${t.id})}" 
+                                                   class="btn btn-outline-danger btn-2sm text-2xs py-0.5 px-2"
+                                                   onclick="return confirm('Voulez-vous vraiment clore cette équipe académique ?');">
+                                                    🗑️ Clore
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

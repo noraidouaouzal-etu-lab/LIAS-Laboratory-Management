@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Modifier le Parcours du Chercheur - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Dispatcher -->
+            <div th:replace="~{fragments :: sidebar-dynamic('members')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <div>
+                        <a href="/director/members" class="text-xs text-decoration-none text-muted">← Retour à l'Annuaire</a>
+                        <h1 class="h4 mt-1">⚖️ Moduler le Parcours et l'Habilitation du Chercheur</h1>
+                    </div>
+                </div>
+
+                <div class="card p-4 max-w-2xl shadow-xs border">
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-sm text-primary mb-0">🧑 Chercheur : <span th:text="${member.firstName + ' ' + member.lastName}">Abdelouahad ENNASSIRI</span></h5>
+                        <p class="text-xs text-muted font-mono" th:text="${member.email}">email@domain.com</p>
+                    </div>
+
+                    <form th:action="@{'/director/members/edit/' + ${member.id}}" method="post">
+                        <!-- Statut (Status) -->
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold uppercase">1. Statut de Recherche (Status)</label>
+                            <select class="form-select text-xs" name="status" required>
+                                <option value="PERMANENT" th:selected="${member.status == 'PERMANENT'}">Permanent</option>
+                                <option value="ASSOCIATE" th:selected="${member.status == 'ASSOCIATE'}">Associate</option>
+                                <option value="DOCTORANT" th:selected="${member.status == 'DOCTORANT'}">Doctorant</option>
+                                <option value="RETIRED" th:selected="${member.status == 'RETIRED'}">Retired</option>
+                                <option value="FORMER_MEMBER" th:selected="${member.status == 'FORMER_MEMBER'}">Former member</option>
+                            </select>
+                            <div class="form-text text-2xs text-muted mt-1">Le statut régit le type d'intégration académique du chercheur.</div>
+                        </div>
+
+                        <!-- Rôle / Mandat de Direction (Role) -->
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold uppercase">2. Rôle d'Habilitation / Mandat (Role)</label>
+                            <select class="form-select text-xs" name="roleTitle" required>
+                                <option value="MEMBER" th:selected="${currentRole == 'MEMBER'}">Membre (Chercheur standard)</option>
+                                <option value="TEAM_LEADER" th:selected="${currentRole == 'TEAM_LEADER'}">Team Leader (Chef d'Équipe)</option>
+                                <option value="VICE_DIRECTOR" th:selected="${currentRole == 'VICE_DIRECTOR'}">Vice-Directeur (Mandat d'Administration)</option>
+                                <option value="DIRECTOR" th:selected="${currentRole == 'DIRECTOR'}">Directeur du Laboratoire (Direction suprême)</option>
+                            </select>
+                            <div class="form-text text-2xs text-muted mt-1">L'affectation comme Directeur, Vice-Directeur ou Directeur d'équipe est historiquement archivée.</div>
+                        </div>
+
+                        <!-- Équipe d'affectation (Team) -->
+                        <div class="mb-4">
+                            <label class="form-label text-xs fw-bold uppercase">3. Équipe ou Axe Affilié (Team)</label>
+                            <select class="form-select text-xs" name="teamId">
+                                <option value="">-- Aucune Équipe / Axe --</option>
+                                <option th:each="t : ${teams}" 
+                                        th:value="${t.id}" 
+                                        th:text="${t.name}" 
+                                        th:selected="${member.team != null && member.team.id == t.id}">Axe</option>
+                            </select>
+                            <div class="form-text text-2xs text-muted mt-1">Le changement d'équipe clôturera l'historique de l'ancienne affiliation et ouvrira une nouvelle entrée datée d'aujourd'hui.</div>
+                        </div>
+
+                        <div class="pt-2 border-top">
+                            <button type="submit" class="btn btn-warning text-dark fw-bold btn-sm px-4">💾 Sauvegarder les modifications</button>
+                            <a href="/director/members" class="btn btn-outline-secondary btn-sm px-3 ms-2">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

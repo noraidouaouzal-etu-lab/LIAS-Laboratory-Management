@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Événements Académiques - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container my-5">
+        <h2 class="fw-bold text-dark mb-4">📅 Événements & Journées Scientifiques Ouvertes</h2>
+
+        <div class="row">
+            <div class="col-md-6 mb-4" th:each="event : ${events}">
+                <div class="card p-4 h-100 bg-white">
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-2 align-self-start py-1 px-2.5" th:text="${event.type}" style="font-size: 10px;">CONFERENCE</span>
+                    <h5 th:text="${event.title}" class="fw-bold mb-2">Titre</h5>
+                    <p th:text="${event.description}" class="text-sm text-secondary mb-3">Description...</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                        <span class="text-xs text-muted" th:text="${'📆 ' + event.date}">Date</span>
+                        <span class="text-xs text-muted" th:text="${'📍 ' + event.location}">Lieu</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12" th:if="${#lists.isEmpty(events)}">
+                <div class="alert alert-warning py-4 text-center fw-semibold text-sm">
+                    Aucun événement prévu.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

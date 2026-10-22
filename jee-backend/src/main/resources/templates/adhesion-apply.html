@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Demande d\'adhésion - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card p-5 border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="text-center mb-4">
+                        <div th:replace="~{fragments :: fsbm-logo('light')}" class="mx-auto mb-3" style="max-width: 150px;"></div>
+                        <h3 class="fw-bold text-dark" style="font-family: 'Plus Jakarta Sans', sans-serif;">Demande d'Adhésion au Laboratoire</h3>
+                        <p class="text-xs text-secondary">Veuillez soumettre votre candidature de recherche au directeur du laboratoire.</p>
+                    </div>
+
+                    <div th:if="${error}" class="alert alert-danger text-xs py-2">
+                        <span th:text="${error}">Erreur</span>
+                    </div>
+
+                    <div th:if="${param.success}" class="alert alert-success text-sm py-3 text-center">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        <strong>Votre demande a été envoyée au directeur du laboratoire.</strong><br>
+                        <span class="text-xs text-secondary">You will receive a response after validation by the laboratory director.</span>
+                    </div>
+
+                    <form th:action="@{/adhesions/apply}" method="post" enctype="multipart/form-data" th:unless="${param.success}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-xs fw-semibold text-secondary">Prénom</label>
+                                <input type="text" name="firstName" class="form-control form-control-sm" placeholder="ex: Salma" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-xs fw-semibold text-secondary">Nom de famille</label>
+                                <input type="text" name="lastName" class="form-control form-control-sm" placeholder="ex: ALAMI" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-semibold text-secondary">Adresse E-mail académique</label>
+                            <input type="email" name="email" class="form-control form-control-sm" placeholder="ex: s.alami@univ-h2c.ma" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-xs fw-semibold text-secondary">Institution rattachée</label>
+                                <input type="text" name="institution" class="form-control form-control-sm" placeholder="ex: Université Hassan II" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-xs fw-semibold text-secondary">Laboratoire d'origine</label>
+                                <input type="text" name="originLab" class="form-control form-control-sm" placeholder="ex: LAMS" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-semibold text-secondary">Votre Curriculum Vitae (CV) - PDF uniquement</label>
+                            <input type="file" name="cvFile" class="form-control form-control-sm" accept=".pdf" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-semibold text-secondary">Type d'adhésion demandé (Statut)</label>
+                            <select name="requestedType" class="form-select form-select-sm text-xs" required>
+                                <option value="" disabled selected>-- Sélectionner le statut demandé --</option>
+                                <option value="PERMANENT_MEMBER">Permanent Member (PERMANENT_MEMBER)</option>
+                                <option value="ASSOCIATE">Associate (ASSOCIATE)</option>
+                                <option value="DOCTORANT">Doctorant (DOCTORANT)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-semibold text-secondary">Lettre de motivation & Projet de recherche</label>
+                            <textarea name="motivation" class="form-control text-xs" rows="5" placeholder="Saisissez brièvement vos motivations académiques..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning w-100 fw-bold py-2 mt-3 text-dark">🚀 Soumettre ma Candidature</button>
+                    </form>
+
+                    <div class="text-center mt-4 border-top pt-3">
+                        <a href="/home" class="text-xs text-decoration-none text-muted">← Retour à l'accueil</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

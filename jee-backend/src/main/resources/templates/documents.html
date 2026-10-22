@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Documents Partagés - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Dynamic Sidebar -->
+            <div th:replace="~{fragments :: sidebar-dynamic('documents')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📂 Documents & Archives Partagées</h1>
+                    <span class="text-xs text-muted">Référentiel documentaire officiel du laboratoire LIAS</span>
+                </div>
+
+                <!-- Alert boxes -->
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    📂 Document déposé, indexé et archivé dans le système avec succès !
+                </div>
+                <div th:if="${param.deleted}" class="alert alert-danger py-2 text-xs">
+                    🗑️ Document supprimé définitivement du système !
+                </div>
+                <div th:if="${param.archived}" class="alert alert-info py-2 text-xs">
+                    🔒 Statut d'archivage mis à jour avec succès !
+                </div>
+
+                <!-- Document Upload Form (Only visible to DIRECTOR) -->
+                <div th:if="${isDirector}" class="card p-4 mb-4 border border-secondary border-opacity-10 shadow-sm bg-white">
+                    <h5 class="fw-bold text-xs uppercase mb-3 text-primary">📤 Indexer un Nouveau Fichier / Document Officiel</h5>
+                    <form th:action="@{/director/documents}" method="post" th:object="${newDocument}" enctype="multipart/form-data">
+                        <div class="row align-items-end">
+                            <div class="col-md-5 mb-2">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Intitulé / Titre du document</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Demande de subvention ANR" th:field="*{name}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Nature / Type de document</label>
+                                <select class="form-select form-select-sm text-xs" th:field="*{type}" required>
+                                    <option value="DEMANDE_FINANCEMENT">💵 Demande de financement</option>
+                                    <option value="PROGRAMME">📅 Programme</option>
+                                    <option value="ATTESTATION">📜 Attestation</option>
+                                    <option value="RAPPORT">📈 Rapport</option>
+                                    <option value="DOC_ADMINISTRATIF">🏛️ Document administratif</option>
+                                    <option value="OTHER">📁 Autre / Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-2xs uppercase fw-bold text-muted">Fichier PDF conjoint (PDF uniquement)</label>
+                                <input type="file" name="docFile" class="form-control form-control-sm text-xs" accept="application/pdf" required>
+                            </div>
+                            <div class="col-md-12 mb-2 text-end">
+                                <button type="submit" class="btn btn-primary btn-sm px-4 text-xs fw-bold">🚀 Indexer & Publier</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Search and Filters Section -->
+                <div class="card p-3 mb-4 bg-white border border-secondary border-opacity-10 shadow-xs">
+                    <form method="get" th:action="${isDirector} ? @{/director/documents} : @{/member/documents}">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light text-muted border-end-0 text-xs">🔍</span>
+                                    <input type="text" name="search" th:value="${search}" class="form-control text-xs border-start-0" placeholder="Rechercher par titre (insensible à la casse)...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="filterType" class="form-select form-select-sm text-xs">
+                                    <option value="">-- Filtrer par Nature de Document --</option>
+                                    <option value="DEMANDE_FINANCEMENT" th:selected="${filterType == 'DEMANDE_FINANCEMENT'}">💵 Demande de financement</option>
+                                    <option value="PROGRAMME" th:selected="${filterType == 'PROGRAMME'}">📅 Programme Scientifique</option>
+                                    <option value="ATTESTATION" th:selected="${filterType == 'ATTESTATION'}">📜 Attestation Officielle</option>
+                                    <option value="RAPPORT" th:selected="${filterType == 'RAPPORT'}">📈 Rapport d'activité / Synthèse</option>
+                                    <option value="DOC_ADMINISTRATIF" th:selected="${filterType == 'DOC_ADMINISTRATIF'}">🏛️ Document administratif</option>
+                                    <option value="OTHER" th:selected="${filterType == 'OTHER'}">📁 Autre / Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-outline-primary btn-sm w-100 text-xs">Filtrer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Section: Documents actifs -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom border-light">
+                        <h5 class="m-0 fw-bold text-sm text-dark d-flex align-items-center">
+                            <span class="badge bg-success me-2" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+                            Documents actifs
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>📄 Intitulé du Document</th>
+                                    <th>Nature officiel</th>
+                                    <th>Date de dépôt</th>
+                                    <th>Déposé par</th>
+                                    <th>Statut</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="doc : ${activeDocuments}">
+                                    <td class="fw-bold text-dark font-sans">
+                                        <span class="fs-6 block" th:text="${doc.name}">Titre du Document</span>
+                                        <small class="text-muted d-block font-mono text-2xs" th:text="${doc.fileName}">file.pdf</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger text-2xs uppercase border border-danger border-opacity-20" th:if="${doc.type == 'DEMANDE_FINANCEMENT'}">💵 Financement</span>
+                                        <span class="badge bg-info bg-opacity-10 text-info text-2xs uppercase border border-info border-opacity-20" th:if="${doc.type == 'PROGRAMME'}">📅 Programme</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-secondary text-2xs uppercase border border-secondary border-opacity-20" th:if="${doc.type == 'ATTESTATION'}">📜 Attestation</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary text-2xs uppercase border border-primary border-opacity-20" th:if="${doc.type == 'RAPPORT'}">📈 Rapport</span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-2xs uppercase border border-secondary border-opacity-20" th:if="${doc.type == 'DOC_ADMINISTRATIF'}">🏛️ Admin</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-muted text-2xs uppercase border border-secondary" th:if="${doc.type == 'OTHER'}">📁 Autre / Other</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-muted text-2xs uppercase border border-secondary" th:if="${doc.type != 'DEMANDE_FINANCEMENT' && doc.type != 'PROGRAMME' && doc.type != 'ATTESTATION' && doc.type != 'RAPPORT' && doc.type != 'DOC_ADMINISTRATIF' && doc.type != 'OTHER'}" th:text="${doc.type}">AUTRE</span>
+                                    </td>
+                                    <td class="text-secondary font-mono" th:text="${doc.uploadDate != null ? #temporals.format(doc.uploadDate, 'yyyy-MM-dd HH:mm') : (doc.dateUpload != null ? #temporals.format(doc.dateUpload, 'yyyy-MM-dd HH:mm') : 'N/A')}">2026-10-18 14:00</td>
+                                    <td class="text-secondary" th:text="${doc.uploadedBy != null ? doc.uploadedBy : 'N/A'}">Anonymous</td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-15 text-success text-2xs">Actif</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1 justify-content-end align-items-center">
+                                            <!-- Download button (always available) -->
+                                            <a th:href="@{/documents/download/{id}(id=${doc.id})}" class="btn btn-outline-secondary btn-2sm text-xs py-1 px-2">
+                                                📥 Télécharger
+                                            </a>
+                                            <!-- Archive action for Director only -->
+                                            <form th:if="${isDirector}" th:action="@{/director/documents/archive/{id}(id=${doc.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-outline-warning btn-2sm text-xs py-1 px-2 text-dark font-semibold">
+                                                    🔒 Archiver
+                                                </button>
+                                            </form>
+                                            <!-- Delete option for Director only -->
+                                            <form th:if="${isDirector}" th:action="@{/director/documents/delete/{id}(id=${doc.id})}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer définitivement ce document ?');" class="m-0">
+                                                <button type="submit" class="btn btn-outline-danger btn-2sm text-xs py-1 px-2 font-semibold">
+                                                    🗑️ Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(activeDocuments)}">
+                                    <td colspan="6" class="text-center text-muted py-5 text-italic fs-6">
+                                        <div class="fs-2 mb-2">📁</div>
+                                        Aucun document enregistré.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section: Documents archivés -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom border-light">
+                        <h5 class="m-0 fw-bold text-sm text-dark d-flex align-items-center">
+                            <span class="badge bg-warning me-2" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span>
+                            Documents archivés
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>📄 Intitulé du Document</th>
+                                    <th>Nature officiel</th>
+                                    <th>Date de dépôt</th>
+                                    <th>Déposé par</th>
+                                    <th>Statut</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="doc : ${archivedDocuments}">
+                                    <td class="fw-bold text-dark font-sans">
+                                        <span class="fs-6 block" th:text="${doc.name}">Titre du Document</span>
+                                        <small class="text-muted d-block font-mono text-2xs" th:text="${doc.fileName}">file.pdf</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger text-2xs uppercase border border-danger border-opacity-20" th:if="${doc.type == 'DEMANDE_FINANCEMENT'}">💵 Financement</span>
+                                        <span class="badge bg-info bg-opacity-10 text-info text-2xs uppercase border border-info border-opacity-20" th:if="${doc.type == 'PROGRAMME'}">📅 Programme</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-secondary text-2xs uppercase border border-secondary border-opacity-20" th:if="${doc.type == 'ATTESTATION'}">📜 Attestation</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary text-2xs uppercase border border-primary border-opacity-20" th:if="${doc.type == 'RAPPORT'}">📈 Rapport</span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary text-2xs uppercase border border-secondary border-opacity-20" th:if="${doc.type == 'DOC_ADMINISTRATIF'}">🏛️ Admin</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-muted text-2xs uppercase border border-secondary" th:if="${doc.type == 'OTHER'}">📁 Autre / Other</span>
+                                        <span class="badge bg-dark bg-opacity-10 text-muted text-2xs uppercase border border-secondary" th:if="${doc.type != 'DEMANDE_FINANCEMENT' && doc.type != 'PROGRAMME' && doc.type != 'ATTESTATION' && doc.type != 'RAPPORT' && doc.type != 'DOC_ADMINISTRATIF' && doc.type != 'OTHER'}" th:text="${doc.type}">AUTRE</span>
+                                    </td>
+                                    <td class="text-secondary font-mono" th:text="${doc.uploadDate != null ? #temporals.format(doc.uploadDate, 'yyyy-MM-dd HH:mm') : (doc.dateUpload != null ? #temporals.format(doc.dateUpload, 'yyyy-MM-dd HH:mm') : 'N/A')}">2026-10-18 14:00</td>
+                                    <td class="text-secondary" th:text="${doc.uploadedBy != null ? doc.uploadedBy : 'N/A'}">Anonymous</td>
+                                    <td>
+                                        <span class="badge bg-secondary text-white text-2xs">Archivé</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1 justify-content-end align-items-center">
+                                            <!-- Download button -->
+                                            <a th:href="@{/documents/download/{id}(id=${doc.id})}" class="btn btn-outline-secondary btn-2sm text-xs py-1 px-2">
+                                                📥 Télécharger
+                                            </a>
+                                            <!-- Restore action for Director only -->
+                                            <form th:if="${isDirector}" th:action="@{/director/documents/archive/{id}(id=${doc.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-outline-success btn-2sm text-xs py-1 px-2 text-dark font-semibold">
+                                                    🔓 Rétablir
+                                                </button>
+                                            </form>
+                                            <!-- Delete option for Director only -->
+                                            <form th:if="${isDirector}" th:action="@{/director/documents/delete/{id}(id=${doc.id})}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer définitivement ce document ?');" class="m-0">
+                                                <button type="submit" class="btn btn-outline-danger btn-2sm text-xs py-1 px-2 font-semibold">
+                                                    🗑️ Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(archivedDocuments)}">
+                                    <td colspan="6" class="text-center text-muted py-5 text-italic fs-6">
+                                        <div class="fs-2 mb-2">📁</div>
+                                        Aucun document enregistré.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section: Historique des Actions (Audit Trail Log) -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom border-light">
+                        <h5 class="m-0 fw-bold text-sm text-dark d-flex align-items-center">
+                            <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>
+                            Journal d'Audit & Historique des Documents
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date de l'action</th>
+                                    <th>Nom du Document</th>
+                                    <th>Type d'action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="hist : ${historyList}">
+                                    <td class="text-secondary font-mono" th:text="${hist.actionDate != null ? #temporals.format(hist.actionDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">2026-10-18 14:05:12</td>
+                                    <td class="fw-bold text-dark" th:text="${hist.documentName}">Rapport ANR</td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-15 text-success" th:if="${hist.actionType == 'UPLOADED'}">Mise en ligne</span>
+                                        <span class="badge bg-danger bg-opacity-15 text-danger" th:if="${hist.actionType == 'DELETED'}">Suppression</span>
+                                        <span class="badge bg-warning bg-opacity-15 text-warning" th:if="${hist.actionType == 'ARCHIVED'}">Archivage</span>
+                                        <span class="badge bg-info bg-opacity-15 text-info" th:if="${hist.actionType == 'UNARCHIVED'}">Restauration</span>
+                                        <span class="badge bg-secondary text-secondary" th:if="${hist.actionType != 'UPLOADED' && hist.actionType != 'DELETED' && hist.actionType != 'ARCHIVED' && hist.actionType != 'UNARCHIVED'}" th:text="${hist.actionType}">AUTRE</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(historyList)}">
+                                    <td colspan="3" class="text-center text-muted py-4 text-italic">
+                                        Aucune action enregistrée dans l'historique.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+</body>
+</html>

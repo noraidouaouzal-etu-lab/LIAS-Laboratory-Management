@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Événements Académiques & Séminaires - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Dispatcher -->
+            <div th:replace="~{fragments :: sidebar-dynamic('events')}"></div>
+
+            <!-- Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <style>
+                    .hover-card {
+                        transition: transform 0.25s ease, box-shadow 0.25s ease;
+                        border-radius: 1rem !important;
+                    }
+                    .hover-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+                    }
+                    .animate-pulse {
+                        animation: pulse-dot 2s infinite;
+                    }
+                    @keyframes pulse-dot {
+                        0% { opacity: 0.4; }
+                        50% { opacity: 1; }
+                        100% { opacity: 0.4; }
+                    }
+                    .badge-pill {
+                        border-radius: 50rem !important;
+                    }
+                </style>
+
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4 border-bottom">
+                    <div>
+                        <h1 class="h4 text-dark fw-bold mb-1">
+                            <i class="fa-solid fa-calendar-day text-primary me-2"></i> Activités Scientifiques & Manifestations
+                        </h1>
+                        <p class="text-xs text-secondary mb-0">Découvrez et suivez les conférences, séminaires et ateliers scientifiques organisés par le Laboratoire LIAS.</p>
+                    </div>
+                </div>
+
+                <!-- Action Notifications -->
+                <div th:if="${param.success}" class="alert alert-success d-flex align-items-center gap-2 py-2.5 rounded-3 text-xs mb-4">
+                    <i class="fa-solid fa-circle-check text-success"></i>
+                    <span>Opération effectuée avec succès !</span>
+                </div>
+                <div th:if="${param.deleted}" class="alert alert-danger d-flex align-items-center gap-2 py-2.5 rounded-3 text-xs mb-4">
+                    <i class="fa-solid fa-trash text-danger"></i>
+                    <span>Événement retiré définitivement du calendrier scientifique.</span>
+                </div>
+
+                <!-- Event creation section for Director ONLY -->
+                <div class="card p-4 mb-4 border border-warning border-opacity-25 rounded-4 bg-white shadow-2xs" th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'')')}">
+                    <div class="d-flex align-items-center gap-2 mb-3 border-bottom pb-2">
+                        <i class="fa-solid fa-calendar-plus text-warning fa-lg"></i>
+                        <h5 class="fw-bold text-xs uppercase mb-0 text-dark">Planifier ou Modifier un Événement du Laboratoire</h5>
+                    </div>
+                    
+                    <form th:action="@{/director/events/save}" method="post" th:object="${newEvent}">
+                        <!-- Hidden ID if editing represents a populated field -->
+                        <input type="hidden" th:field="*{id}">
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-heading text-muted me-1"></i> Intitulé de l'événement</label>
+                                <input type="text" class="form-control form-control-sm text-xs rounded-2" placeholder="ex: Journée IA & Aide à la Décision" th:field="*{title}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-list-check text-muted me-1"></i> Type d'activité</label>
+                                <select class="form-select form-select-sm text-xs rounded-2" th:field="*{type}" required>
+                                    <option value="CONFERENCE">CONFERENCE (Grand format / National)</option>
+                                    <option value="SEMINAR">SEMINAR (Communication restreinte)</option>
+                                    <option value="WORKSHOP">WORKSHOP (Atelier technique pratique)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-calendar text-muted me-1"></i> Date de réalisation</label>
+                                <input type="date" class="form-control form-control-sm text-xs rounded-2" th:field="*{date}" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-hashtag text-muted me-1"></i> Édition / Année</label>
+                                <input type="text" class="form-control form-control-sm text-xs rounded-2" placeholder="ex: 2026, 4ème Éd." th:field="*{edition}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-location-dot text-muted me-1"></i> Lieu / Salle</label>
+                                <input type="text" class="form-control form-control-sm text-xs rounded-2" placeholder="ex: Salle de conférence principale, FSBM" th:field="*{location}" required>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-clock text-muted me-1"></i> Horaire</label>
+                                <input type="text" class="form-control form-control-sm text-xs rounded-2" placeholder="ex: 14:00" th:field="*{time}">
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-user-tie text-muted me-1"></i> Assigner des Organisateurs (Membres)</label>
+                                <div class="p-2 border rounded bg-light" style="max-height: 120px; overflow-y: auto;">
+                                    <div class="form-check text-xs" th:each="m : ${allMembers}">
+                                        <input class="form-check-input" type="checkbox" name="organizerIds" th:value="${m.id}" th:id="${'membCheckbox_' + m.id}" th:checked="${newEvent != null && newEvent.organizers != null && #sets.contains(newEvent.organizers.![id], m.id)}">
+                                        <label class="form-check-label text-dark" th:for="${'membCheckbox_' + m.id}" th:text="${m.lastName + ' ' + m.firstName + ' (' + m.status + ')'}">
+                                            Ennassiri Abdelouahad
+                                        </label>
+                                    </div>
+                                    <div class="text-xs text-muted text-center py-2" th:if="${#lists.isEmpty(allMembers)}">
+                                        Aucun membre éligible à l'organisation n'est enregistré dans l'annuaire.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-semibold"><i class="fa-solid fa-file-text text-muted me-1"></i> Description complète & thématiques abordées</label>
+                            <textarea class="form-control text-xs rounded-3" rows="3" th:field="*{description}" placeholder="Saisir les thématiques abordées, objectifs de la manifestation..."></textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-warning btn-sm text-dark fw-bold px-4 rounded-2">
+                                <i class="fa-solid fa-save me-1"></i> Enregistrer et Publier
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Search & Filter Controls -->
+                <div class="card p-3 mb-4 bg-white border border-secondary border-opacity-10 shadow-xs rounded-3">
+                    <form th:action="@{''}" method="get" class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light text-muted border-end-0 rounded-start-2"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" name="search" class="form-control text-xs border-start-0 rounded-end-2 py-2" placeholder="Rechercher par titre de l'événement..." th:value="${search}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="filterType" class="form-select form-select-sm text-xs rounded-2 py-2">
+                                <option value="ALL" th:selected="${filterType == null || filterType == 'ALL'}">Tous les types d'activités</option>
+                                <option value="CONFERENCE" th:selected="${filterType == 'CONFERENCE'}">Conférence (Grand format)</option>
+                                <option value="SEMINAR" th:selected="${filterType == 'SEMINAR'}">Séminaire (Communication restreinte)</option>
+                                <option value="WORKSHOP" th:selected="${filterType == 'WORKSHOP'}">Atelier / Workshop (Technique)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary text-white btn-sm text-xs w-100 fw-semibold rounded-2 py-2">
+                                    Filtrer
+                                </button>
+                                <a th:href="@{''}" class="btn btn-outline-secondary btn-sm text-xs w-100 rounded-2 py-2">
+                                    Réinitialiser
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Upcoming Events Section -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-4">
+                        <i class="fa-solid fa-calendar-check text-primary fa-lg"></i>
+                        <h4 class="h5 fw-bold text-dark mb-0">Événements à venir</h4>
+                    </div>
+
+                    <div class="row" th:if="${upcomingEvents != null && !#lists.isEmpty(upcomingEvents)}">
+                        <div class="col-md-6 mb-4" th:each="ev : ${upcomingEvents}">
+                            <div class="card p-4 h-100 d-flex flex-column border-0 shadow-sm hover-card bg-white">
+                                <!-- Top Badges -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <!-- Event Type Badge -->
+                                    <span th:if="${ev.type == 'CONFERENCE'}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-tag me-1 text-primary"></i> Conférence
+                                    </span>
+                                    <span th:if="${ev.type == 'WORKSHOP'}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-gears me-1 text-success"></i> Atelier / Workshop
+                                    </span>
+                                    <span th:if="${ev.type == 'SEMINAR'}" class="badge bg-purple bg-opacity-10 text-purple border border-purple border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs" style="background-color: rgba(111, 66, 193, 0.1); color: #6f42c1; border-color: rgba(111, 66, 193, 0.25);">
+                                        <i class="fa-solid fa-graduation-cap me-1" style="color: #6f42c1;"></i> Séminaire
+                                    </span>
+                                    <span th:if="${ev.type != 'CONFERENCE' && ev.type != 'WORKSHOP' && ev.type != 'SEMINAR'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-star me-1 text-warning"></i> Manifestation
+                                    </span>
+
+                                    <!-- Status Badge -->
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs animate-pulse">
+                                        <i class="fa-solid fa-circle text-success me-1"></i> À venir
+                                    </span>
+                                </div>
+
+                                <!-- Title -->
+                                <h5 class="fw-bold mb-2 text-dark font-serif" th:text="${ev.title != null ? ev.title : 'Non renseigné'}">Journées Scientifiques</h5>
+                                
+                                <!-- Edition -->
+                                <div class="mb-3" th:if="${ev.edition != null && !#strings.isEmpty(ev.edition)}">
+                                    <span class="badge bg-light text-muted border text-2xs rounded-pill">
+                                        <i class="fa-solid fa-award text-secondary me-1"></i> Édition: <strong th:text="${ev.edition}">2026</strong>
+                                    </span>
+                                </div>
+
+                                <!-- Description -->
+                                <p class="text-xs text-secondary leading-relaxed flex-grow-1" th:text="${ev.description != null && !#strings.isEmpty(ev.description) ? ev.description : 'Aucune description fournie.'}">Description de l'événement.</p>
+                                
+                                <!-- Organizers and Team Section -->
+                                <div class="my-3 pt-3 border-top border-light">
+                                    <!-- Organizers -->
+                                    <div class="mb-2">
+                                        <span class="text-xs text-muted fw-bold d-block mb-1">
+                                            <i class="fa-solid fa-people-group text-primary me-1"></i> Organisateurs:
+                                        </span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span th:each="organizer : ${ev.organizers}" th:if="${organizer != null}" class="badge bg-light text-dark border text-2xs rounded-pill px-2.5 py-1">
+                                                <i class="fa-solid fa-user text-muted me-1"></i> <span th:text="${organizer.firstName + ' ' + organizer.lastName}">Membre</span>
+                                            </span>
+                                            <span th:if="${ev.organizers == null || #lists.isEmpty(ev.organizers)}" class="text-2xs text-danger py-1">
+                                                <i class="fa-solid fa-circle-xmark text-danger me-1"></i> Aucun organisateur.
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Research Team -->
+                                    <div class="mb-2" th:if="${ev.getTeamsDisplayString() != ''}">
+                                        <span class="text-xs text-muted fw-bold d-block mb-1">
+                                            <i class="fa-solid fa-building text-info me-1"></i> Équipe de recherche:
+                                        </span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 text-2xs rounded-pill px-2.5 py-1">
+                                                <i class="fa-solid fa-laptop-code text-info me-1"></i> <span th:text="${ev.getTeamsDisplayString()}">Équipe</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Metadata Row -->
+                                <div class="row g-2 pt-2 border-top border-light text-xs text-muted font-mono mt-auto">
+                                    <div class="col-6">
+                                        <i class="fa-solid fa-calendar-day text-primary me-1.5"></i>
+                                        <strong th:text="${ev.date != null ? ev.date : 'Non renseigné'}">2026-10-18</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fa-solid fa-clock text-warning me-1.5"></i>
+                                        <strong th:text="${ev.time != null && !#strings.isEmpty(ev.time) ? ev.time : 'Non renseigné'}">14:00</strong>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        <i class="fa-solid fa-location-dot text-danger me-1.5"></i>
+                                        <strong th:text="${ev.location != null && !#strings.isEmpty(ev.location) ? ev.location : 'Non renseigné'}">Casablanca, FSBM</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Controls for Director -->
+                                <div class="d-flex justify-content-end gap-2 border-top border-light mt-3 pt-2" th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'')')}">
+                                    <a th:href="@{/director/events/edit/{id}(id=${ev.id}, search=${search}, filterType=${filterType})}" class="btn btn-outline-warning btn-sm text-xs px-2.5 py-1 text-dark fw-semibold rounded-2">
+                                        <i class="fa-solid fa-edit"></i> Modifier
+                                    </a>
+                                    <a th:href="@{'/director/events/archive/' + ${ev.id}}" class="btn btn-outline-secondary btn-sm text-xs px-2.5 py-1 rounded-2">
+                                        <i class="fa-solid fa-lock"></i> Archiver
+                                    </a>
+                                    <a th:href="@{'/director/events/delete/' + ${ev.id}}" class="btn btn-outline-danger btn-sm text-xs px-2.5 py-1 rounded-2" onclick="return confirm('Voulez-vous retirer définitivement cet événement ?');">
+                                        <i class="fa-solid fa-trash"></i> Supprimer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Beautiful Empty Card with Icon -->
+                    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white" th:if="${upcomingEvents == null || #lists.isEmpty(upcomingEvents)}">
+                        <div class="mb-3 text-primary text-opacity-50">
+                            <i class="fa-solid fa-calendar-xmark fa-3x animate-pulse"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">📆 Aucun événement prévu.</h6>
+                        <p class="text-xs text-muted mb-0">Il n'y a pas d'activité scientifique planifiée prochainement correspondant aux critères.</p>
+                    </div>
+                </div>
+
+                <!-- Archived Events Section -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-4">
+                        <i class="fa-solid fa-box-archive text-secondary fa-lg"></i>
+                        <h4 class="h5 fw-bold text-secondary mb-0">Événements archivés</h4>
+                    </div>
+
+                    <div class="row" th:if="${archivedEvents != null && !#lists.isEmpty(archivedEvents)}">
+                        <div class="col-md-6 mb-4" th:each="ev : ${archivedEvents}">
+                            <div class="card p-4 h-100 d-flex flex-column border-0 shadow-sm hover-card bg-light border-danger border-opacity-10">
+                                <!-- Top Badges -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <!-- Event Type Badge -->
+                                    <span th:if="${ev.type == 'CONFERENCE'}" class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-tag me-1 text-primary"></i> Conférence
+                                    </span>
+                                    <span th:if="${ev.type == 'WORKSHOP'}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-gears me-1 text-success"></i> Atelier / Workshop
+                                    </span>
+                                    <span th:if="${ev.type == 'SEMINAR'}" class="badge bg-purple bg-opacity-10 text-purple border border-purple border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs" style="background-color: rgba(111, 66, 193, 0.1); color: #6f42c1; border-color: rgba(111, 66, 193, 0.25);">
+                                        <i class="fa-solid fa-graduation-cap me-1" style="color: #6f42c1;"></i> Séminaire
+                                    </span>
+                                    <span th:if="${ev.type != 'CONFERENCE' && ev.type != 'WORKSHOP' && ev.type != 'SEMINAR'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-star me-1 text-warning"></i> Manifestation
+                                    </span>
+
+                                    <!-- Status Badge -->
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 badge-pill py-1.5 px-3 fw-bold text-xs">
+                                        <i class="fa-solid fa-lock text-secondary me-1"></i> Archivée
+                                    </span>
+                                </div>
+
+                                <!-- Title -->
+                                <h5 class="fw-bold mb-2 text-dark font-serif" th:text="${ev.title != null ? ev.title : 'Non renseigné'}">Journées Scientifiques</h5>
+                                
+                                <!-- Edition -->
+                                <div class="mb-3" th:if="${ev.edition != null && !#strings.isEmpty(ev.edition)}">
+                                    <span class="badge bg-light text-muted border text-2xs rounded-pill">
+                                        <i class="fa-solid fa-award text-secondary me-1"></i> Édition: <strong th:text="${ev.edition}">2026</strong>
+                                    </span>
+                                </div>
+
+                                <!-- Description -->
+                                <p class="text-xs text-secondary leading-relaxed flex-grow-1" th:text="${ev.description != null && !#strings.isEmpty(ev.description) ? ev.description : 'Aucune description fournie.'}">Description de l'événement.</p>
+                                
+                                <!-- Organizers and Team Section -->
+                                <div class="my-3 pt-3 border-top border-light">
+                                    <!-- Organizers -->
+                                    <div class="mb-2">
+                                        <span class="text-xs text-muted fw-bold d-block mb-1">
+                                            <i class="fa-solid fa-people-group text-primary me-1"></i> Organisateurs:
+                                        </span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span th:each="organizer : ${ev.organizers}" th:if="${organizer != null}" class="badge bg-light text-dark border text-2xs rounded-pill px-2.5 py-1">
+                                                <i class="fa-solid fa-user text-muted me-1"></i> <span th:text="${organizer.firstName + ' ' + organizer.lastName}">Membre</span>
+                                            </span>
+                                            <span th:if="${ev.organizers == null || #lists.isEmpty(ev.organizers)}" class="text-2xs text-danger py-1">
+                                                <i class="fa-solid fa-circle-xmark text-danger me-1"></i> Aucun organisateur.
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Research Team -->
+                                    <div class="mb-2" th:if="${ev.getTeamsDisplayString() != ''}">
+                                        <span class="text-xs text-muted fw-bold d-block mb-1">
+                                            <i class="fa-solid fa-building text-info me-1"></i> Équipe de recherche:
+                                        </span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 text-2xs rounded-pill px-2.5 py-1">
+                                                <i class="fa-solid fa-laptop-code text-info me-1"></i> <span th:text="${ev.getTeamsDisplayString()}">Équipe</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Metadata Row -->
+                                <div class="row g-2 pt-2 border-top border-light text-xs text-muted font-mono mt-auto">
+                                    <div class="col-6">
+                                        <i class="fa-solid fa-calendar-day text-primary me-1.5"></i>
+                                        <strong th:text="${ev.date != null ? ev.date : 'Non renseigné'}">2026-10-18</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fa-solid fa-clock text-warning me-1.5"></i>
+                                        <strong th:text="${ev.time != null && !#strings.isEmpty(ev.time) ? ev.time : 'Non renseigné'}">14:00</strong>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        <i class="fa-solid fa-location-dot text-danger me-1.5"></i>
+                                        <strong th:text="${ev.location != null && !#strings.isEmpty(ev.location) ? ev.location : 'Non renseigné'}">Casablanca, FSBM</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Controls for Director -->
+                                <div class="d-flex justify-content-end gap-2 border-top border-light mt-3 pt-2" th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'')')}">
+                                    <a th:href="@{/director/events/edit/{id}(id=${ev.id}, search=${search}, filterType=${filterType})}" class="btn btn-outline-warning btn-sm text-xs px-2.5 py-1 text-dark fw-semibold rounded-2">
+                                        <i class="fa-solid fa-edit"></i> Modifier
+                                    </a>
+                                    <a th:href="@{'/director/events/archive/' + ${ev.id}}" class="btn btn-outline-secondary btn-sm text-xs px-2.5 py-1 rounded-2">
+                                        <i class="fa-solid fa-unlock"></i> Rétablir
+                                    </a>
+                                    <a th:href="@{'/director/events/delete/' + ${ev.id}}" class="btn btn-outline-danger btn-sm text-xs px-2.5 py-1 rounded-2" onclick="return confirm('Voulez-vous retirer définitivement cet événement ?');">
+                                        <i class="fa-solid fa-trash"></i> Supprimer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Beautiful Empty Card with Icon -->
+                    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white" th:if="${archivedEvents == null || #lists.isEmpty(archivedEvents)}">
+                        <div class="mb-3 text-secondary text-opacity-50">
+                            <i class="fa-solid fa-box-archive fa-3x"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">🔒 Aucun événement archivé.</h6>
+                        <p class="text-xs text-muted mb-0">Aucune activité scientifique n'a été classée dans les archives pour les critères sélectionnés.</p>
+                    </div>
+                </div>
+
+                <!-- Global Empty State -->
+                <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white mb-4" th:if="${(upcomingEvents == null || #lists.isEmpty(upcomingEvents)) && (archivedEvents == null || #lists.isEmpty(archivedEvents))}">
+                    <div class="mb-3 text-warning text-opacity-50">
+                        <i class="fa-solid fa-calendar-minus fa-4x animate-pulse"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">📅 Aucun événement enregistré.</h5>
+                    <p class="text-xs text-muted mb-0">Le laboratoire ne compte actuellement aucun enregistrement dans son calendrier d'activités.</p>
+                </div>
+
+            </main>
+        </div>
+    </div>
+</body>
+</html>

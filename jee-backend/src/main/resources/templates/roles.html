@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Rôles et Habilitations - Administration LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-admin('roles')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🔑 Attribution des Droits & Rôles de Sécurité</h1>
+                </div>
+
+                <div class="card p-3 mb-4 bg-light border">
+                    <h6 class="fw-bold mb-1 text-primary">Contrôles de Permissions par Rôle d'Accès :</h6>
+                    <p class="text-xs text-muted mb-0">Le Laboratoire LIAS utilise Spring Security 6 pour restreindre les contextes URL de manière stricte.</p>
+                </div>
+
+                <!-- Roles Table -->
+                <div class="card p-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th># ID</th>
+                                <th>Intitulé du Rôle</th>
+                                <th>Description / Habilitations associées</th>
+                                <th>Namespace d'accès Tomcat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="r : ${roles}">
+                                <td th:text="${r.id}">1</td>
+                                <td>
+                                    <span class="badge bg-primary font-mono text-xs uppercase" th:text="${r.name}">ROLE_VISITOR</span>
+                                </td>
+                                <td>
+                                    <span th:if="${r.name == 'ROLE_VISITOR'}">Consulter les pages de présentation, équipes, événements publics et publications.</span>
+                                    <span th:if="${r.name == 'ROLE_DOCTORANT'}">Mettre à jour son propre CV/profil de recherche et enregistrer ses articles publiés.</span>
+                                    <span th:if="${r.name == 'ROLE_MEMBER'}">Gérer ses documents partagés, consulter l'annuaire complet et voir l'agenda restreint.</span>
+                                    <span th:if="${r.name == 'ROLE_DIRECTOR'}">Décider des admissions, signer les conventions, valider les PV et exporter les rapports annuels.</span>
+                                    <span th:if="${r.name == 'ROLE_ADMIN'}">Gérer entièrement les utilisateurs, modifier les attributions de privilèges de sécurité.</span>
+                                </td>
+                                <td>
+                                    <code th:if="${r.name == 'ROLE_ADMIN'}">/admin/**</code>
+                                    <code th:if="${r.name == 'ROLE_DIRECTOR'}">/director/**</code>
+                                    <code th:if="${r.name == 'ROLE_MEMBER'}">/member/**</code>
+                                    <code th:if="${r.name == 'ROLE_DOCTORANT'}">/doctorant/**</code>
+                                    <code th:if="${r.name == 'ROLE_VISITOR'}">/home, /teams, /public-*</code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

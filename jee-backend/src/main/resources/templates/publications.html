@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Publications Scientifiques - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebars Dynamic -->
+            <div th:replace="~{fragments :: sidebar-dynamic('publications')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📚 Liste des Publications Scientifiques</h1>
+                </div>
+
+                <div class="alert alert-success py-2 text-xs" th:if="${param.success}">
+                    Opération effectuée avec succès.
+                </div>
+                <div class="alert alert-success py-2 text-xs" th:if="${param.deleted}">
+                    Publication supprimée avec succès.
+                </div>
+                <div class="alert alert-danger py-2 text-xs" th:if="${param.error != null && param.error == 'unauthorized'}">
+                    Erreur : Vous n'êtes pas autorisé à modifier cette publication ou à effectuer cette action.
+                </div>
+
+                <!-- Real-time Statistics Cards (Requirement 6) -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm bg-white text-center">
+                            <span class="text-2xs text-muted uppercase fw-bold tracking-wider mb-1">📚 Total des Publications</span>
+                            <span class="display-6 fw-bold text-dark font-monospace" th:text="${totalPublications != null ? totalPublications : 0}">0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm bg-white text-center">
+                            <span class="text-2xs text-muted uppercase fw-bold tracking-wider mb-1">📅 Publications cette année</span>
+                            <span class="display-6 fw-bold text-warning font-monospace" th:text="${publicationsThisYear != null ? publicationsThisYear : 0}">0</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm bg-white text-center">
+                            <span class="text-2xs text-muted uppercase fw-bold tracking-wider mb-1">👥 Équipes de recherche représentées</span>
+                            <span class="display-6 fw-bold text-primary font-monospace" th:text="${uniqueTeamsCount != null ? uniqueTeamsCount : 0}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search, Filter & Sort Form (Requirements 3 & 4) -->
+                <div class="card p-3 mb-4 bg-light border-0 shadow-sm">
+                    <h6 class="fw-bold text-xs text-uppercase text-secondary mb-3">🔍 Rechercher & Trier les Publications</h6>
+                    <form th:action="@{${#authorization.expression('hasRole(''ROLE_DIRECTOR'')') ? '/director/publications' : (#authorization.expression('hasRole(''ROLE_MEMBER'')') ? '/member/publications' : (#authorization.expression('hasRole(''ROLE_DOCTORANT'')') ? '/doctorant/publications' : (#authorization.expression('hasRole(''ROLE_ASSOCIATE'')') ? '/associate/publications' : '/publications')))}}" method="get" class="row g-2">
+                        <div class="col-md-2">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Titre</label>
+                            <input type="text" name="title" th:value="${title}" class="form-control form-control-sm text-xs" placeholder="Ex: Reinforcement">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Auteur</label>
+                            <input type="text" name="author" th:value="${author}" class="form-control form-control-sm text-xs" placeholder="Ex: S. Alami">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Année</label>
+                            <input type="number" name="year" th:value="${year}" class="form-control form-control-sm text-xs" placeholder="Ex: 2026">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Équipe de recherche</label>
+                            <input type="text" name="team" th:value="${team}" class="form-control form-control-sm text-xs" placeholder="Ex: Décision">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Trier par</label>
+                            <select name="sortBy" class="form-select form-select-sm text-xs">
+                                <option value="" th:selected="${sortBy == null || sortBy == ''}">Par défaut (Année ⬇️)</option>
+                                <option value="year" th:selected="${sortBy == 'year'}">Année</option>
+                                <option value="title" th:selected="${sortBy == 'title'}">Titre</option>
+                                <option value="author" th:selected="${sortBy == 'author'}">Auteur</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label text-2xs fw-bold text-muted uppercase mb-1">Ordre</label>
+                            <select name="sortDir" class="form-select form-select-sm text-xs">
+                                <option value="desc" th:selected="${sortDir == null || sortDir == 'desc' || sortDir == ''}">Décroissant (⬇️)</option>
+                                <option value="asc" th:selected="${sortDir == 'asc'}">Croissant (⬆️)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-xs text-dark" style="height: 31px;">🔍</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Add/Edit Publication Form (Requirement 1 & 7) -->
+                <div class="card p-3 mb-4 border border-primary border-opacity-10" th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'') or hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_DIRECTOR'')')}">
+                    <h5 class="fw-bold text-xs uppercase mb-3 text-secondary" th:text="${newPublication?.id != null ? '✏️ Modifier la Publication' : '💾 Ajouter/Enregistrer une Publication'}">Ajouter/Enregistrer une Publication</h5>
+                    <form th:action="@{${#authorization.expression('hasRole(''ROLE_DIRECTOR'')') ? '/director/publications/save' : (#authorization.expression('hasRole(''ROLE_MEMBER'')') ? '/member/publications/save' : '/doctorant/publications/save')}}" method="post" th:object="${newPublication}">
+                        <input type="hidden" th:field="*{id}">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-2xs text-muted mb-1">Titre de l'Article / Revue *</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="Titre de la publication" th:field="*{title}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-2xs text-muted mb-1">Auteurs *</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: S. Alami, A. Ennassiri" th:field="*{author}" required>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label text-2xs text-muted mb-1">Année de Publication *</label>
+                                <input type="number" class="form-control form-control-sm text-xs" placeholder="Année" th:field="*{year}" required min="1990" max="2100">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label text-2xs text-muted mb-1">Équipe Affiliée</label>
+                                <input type="text" class="form-control form-control-sm text-xs" placeholder="ex: Réseaux Sans Fil" th:field="*{team}">
+                            </div>
+                            <div class="col-md-1 mb-2 d-flex align-items-end gap-1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" style="height: 31px;" th:title="${newPublication?.id != null ? 'Mettre à jour' : 'Enregistrer'}">
+                                    <span th:text="${newPublication?.id != null ? '🔄' : '💾'}">💾</span>
+                                </button>
+                                <a th:if="${newPublication?.id != null}" th:href="@{${#authorization.expression('hasRole(''ROLE_DIRECTOR'')') ? '/director/publications' : (#authorization.expression('hasRole(''ROLE_MEMBER'')') ? '/member/publications' : '/doctorant/publications')}}" class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center" style="height: 31px; width: 31px;" title="Annuler">❌</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Publications Table -->
+                <div class="card p-3 shadow-sm border-0">
+                    <table class="table table-hover mb-0 text-xs align-middle">
+                        <thead>
+                            <tr class="table-light text-uppercase text-muted" style="font-size: 11px;">
+                                <th>Titre de l'Article</th>
+                                <th>Auteurs</th>
+                                <th style="width: 80px;">Année</th>
+                                <th>Équipe Affiliée</th>
+                                <th th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'') or hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_DIRECTOR'')')}" style="width: 100px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pub : ${publications}" th:if="${pub != null}">
+                                <td class="fw-bold text-dark" th:text="${pub?.title}">Titre</td>
+                                <td class="text-primary fw-semibold">
+                                    <i class="fa-solid fa-user-pen text-secondary me-1"></i>
+                                    <span th:text="${pub?.author}">Auteurs</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark text-white font-monospace px-2 py-1" th:text="${pub?.year}">2026</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10" th:text="${pub?.team != null && pub?.team != '' ? pub?.team : 'Général'}">Équipe</span>
+                                </td>
+                                <td th:if="${#authorization.expression('hasRole(''ROLE_MEMBER'') or hasRole(''ROLE_DOCTORANT'') or hasRole(''ROLE_DIRECTOR'')')}">
+                                    <!-- Edit / Delete actions conditionally visible to Director or Owner only -->
+                                    <div class="d-flex gap-1" th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'')') or (pub?.createdBy != null && pub?.createdBy == currentUsername)}">
+                                        <a th:href="@{(${#authorization.expression('hasRole(''ROLE_DIRECTOR'')')} ? '/director/publications/edit/' : (${#authorization.expression('hasRole(''ROLE_MEMBER'')')} ? '/member/publications/edit/' : '/doctorant/publications/edit/')) + ${pub?.id}(title=${title}, author=${author}, year=${year}, team=${team}, sortBy=${sortBy}, sortDir=${sortDir})}" 
+                                           class="btn btn-outline-warning btn-xs py-0.5 px-2 text-dark font-semibold text-2xs" style="font-size: 11px;" title="Modifier">
+                                            ✏️
+                                        </a>
+                                        <a th:href="@{(${#authorization.expression('hasRole(''ROLE_DIRECTOR'')')} ? '/director/publications/delete/' : (${#authorization.expression('hasRole(''ROLE_MEMBER'')')} ? '/member/publications/delete/' : '/doctorant/publications/delete/')) + ${pub?.id}}" 
+                                           class="btn btn-outline-danger btn-xs py-0.5 px-2 text-2xs" style="font-size: 11px;"
+                                           onclick="return confirm('Voulez-vous vraiment supprimer cette publication scientifique ?');" title="Supprimer">
+                                            🗑️
+                                        </a>
+                                    </div>
+                                    <span class="text-muted text-2xs italic" th:unless="${#authorization.expression('hasRole(''ROLE_DIRECTOR'')') or (pub?.createdBy != null && pub?.createdBy == currentUsername)}">🔒 Consultable</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${publications == null || #lists.isEmpty(publications)}">
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <div class="py-3">
+                                        <i class="fa-solid fa-folder-open fs-2 mb-2 d-block text-secondary"></i>
+                                        <span class="fw-bold text-sm text-secondary d-block">Aucune publication enregistrée.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

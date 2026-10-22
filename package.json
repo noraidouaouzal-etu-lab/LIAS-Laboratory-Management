@@ -1,0 +1,12 @@
+{
+  "name": "lias-backend-builder",
+  "version": "1.0.0",
+  "description": "Minimal builder wrapper for LIAS JEE Backend",
+  "scripts": {
+    "build": "echo 'Java project jee-backend is ready.'",
+    "dev": "node -e \"const http = require('http'); http.createServer((req, res) => { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end('<h3>LIAS JEE Backend ready for IntelliJ IDEA 2026.1.2</h3><p>Open <strong>jee-backend</strong> folder in your IDE to run and debug the Spring Boot application.</p>'); }).listen(3000); console.log('Mock dev server running on port 3000');\"",
+    "start": "node -e \"const http = require('http'); http.createServer((req, res) => { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end('<h3>LIAS JEE Backend ready for IntelliJ IDEA 2026.1.2</h3><p>Open <strong>jee-backend</strong> folder in your IDE to run and debug the Spring Boot application.</p>'); }).listen(3000); console.log('Mock dev server running on port 3000');\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

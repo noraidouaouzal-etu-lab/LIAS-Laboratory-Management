@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Rapport Annuel Scientifique - Direction LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('report')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4 text-dark fw-bold">📊 Rapport d'Activité Annuel Scientifique</h1>
+                    <div>
+                        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm text-xs font-mono">🖨️ Imprimer le rapport</button>
+                        <a th:href="@{/director/annual-report/export}" class="btn btn-primary btn-sm text-xs font-mono ms-1">📥 Exporter en PDF</a>
+                    </div>
+                </div>
+
+                <!-- Activité Scientifique Summary Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">👥 Chercheurs Actifs</span>
+                            <h3 class="fw-bold text-dark mt-2" th:text="${totalResearchers}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">💼 Permanents</span>
+                            <h3 class="fw-bold text-success mt-2" th:text="${permanentsCount}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">🎓 Doctorants</span>
+                            <h3 class="fw-bold text-primary mt-2" th:text="${doctorantsCount}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">🔬 Associés</span>
+                            <h3 class="fw-bold text-info mt-2" th:text="${associatesCount}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">📚 Publications</span>
+                            <h3 class="fw-bold text-warning mt-2" th:text="${publicationsCount}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-xs text-center h-100">
+                            <span class="text-2xs uppercase fw-bold text-muted" style="font-size: 10px;">📅 Événements</span>
+                            <h3 class="fw-bold text-danger mt-2" th:text="${eventsCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Activité des Équipes de Recherche (Requirement 4) -->
+                <div class="card p-4 mb-4 border border-secondary border-opacity-10">
+                    <h5 class="fw-bold text-xs uppercase text-primary mb-3">🔥 1. Activité des Équipes de Recherche</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered text-xs mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Équipe de recherche</th>
+                                    <th>Nombre de membres actifs</th>
+                                    <th>Nombre de publications</th>
+                                    <th>Nombre d'événements</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="ts : ${teamStats}">
+                                    <td class="fw-bold text-dark" th:text="${ts.teamName}">Nom de l'équipe</td>
+                                    <td class="font-mono" th:text="${ts.membersCount}">0</td>
+                                    <td class="font-mono text-primary" th:text="${ts.publicationsCount}">0</td>
+                                    <td class="font-mono text-danger" th:text="${ts.eventsCount}">0</td>
+                                </tr>
+                                <tr th:if="${teamStats == null || #lists.isEmpty(teamStats)}">
+                                    <td colspan="4" class="text-center text-muted py-3">Aucune équipe de recherche répertoriée</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section Parc des Équipements de Recherche (Requirement 5) -->
+                <div class="card p-4 mb-4 border border-secondary border-opacity-10">
+                    <h5 class="fw-bold text-xs uppercase text-primary mb-3">💻 2. Parc des Équipements du Laboratoire</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover text-xs mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Équipement</th>
+                                    <th>Catégorie</th>
+                                    <th>Quantité disponible</th>
+                                    <th>Localisation</th>
+                                    <th>Statut d'attribution</th>
+                                    <th>Chercheur assigné</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="equip : ${equipments}">
+                                    <td class="fw-bold text-dark" th:text="${equip != null && equip.name != null ? equip.name : 'Matériel'}">Matériel</td>
+                                    <td th:text="${equip != null && equip.category != null ? equip.category : 'Autre'}">Catégorie</td>
+                                    <td class="font-mono" th:text="${equip != null ? equip.quantity : '0'}">1</td>
+                                    <td th:text="${equip != null && equip.location != null ? equip.location : 'Non spécifié'}">Salle de calcul</td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success" th:if="${equip != null && (equip.status == null || equip.status == 'AVAILABLE')}">DISPONIBLE</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase" th:if="${equip != null && equip.status != null && equip.status != 'AVAILABLE'}" th:text="${equip.status}">STATUS</span>
+                                    </td>
+                                    <td>
+                                        <div th:each="asg : ${assignments}" th:if="${asg != null && asg.equipment != null && equip != null && asg.equipment.id == equip.id}">
+                                            <span class="badge bg-light text-dark border mb-1" th:text="${asg.member != null ? (asg.member.firstName + ' ' + asg.member.lastName) : 'Chercheur'}">Salma Alami</span>
+                                        </div>
+                                        <span th:if="${equip != null && (equip.status == null || equip.status == 'AVAILABLE' || equip.status == 'MAINTENANCE')}" class="text-muted text-2xs italic">Aucun</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${equipments == null || #lists.isEmpty(equipments)}">
+                                    <td colspan="6" class="text-center text-muted py-3">Aucun matériel ou équipement répertorié</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section Production et Animation Scientifique (Requirements 2 & 3) -->
+                <div class="card p-4">
+                    <h5 class="fw-bold text-xs uppercase text-success mb-3">📚 3. Production et Animation Scientifique</h5>
+                    
+                    <h6 class="fw-bold mt-2 mb-2 text-primary">Articles et Publications du Laboratoire :</h6>
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item text-xs" th:each="pub : ${publications}">
+                            📝 <strong th:text="${pub != null && pub.title != null ? pub.title : ''}">Titre</strong> — <span th:text="${pub != null && pub.author != null ? pub.author : ''}">Auteur</span>, indexé en <span th:text="${pub != null && pub.year != null ? pub.year : ''}">Année</span> (Équipe: <span th:text="${pub != null && pub.team != null ? pub.team : ''}">Axe</span>)
+                        </li>
+                        <li class="list-group-item text-xs text-muted text-center py-3" th:if="${publications == null || #lists.isEmpty(publications)}">
+                            Aucune publication enregistrée
+                        </li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4 mb-2 text-success">Événements académiques animés :</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item text-xs" th:each="ev : ${events}">
+                            📅 <strong th:text="${ev != null && ev.title != null ? ev.title : ''}">Titre</strong> — <span th:text="${ev != null && ev.type != null ? ev.type : ''}">Type</span>, le <span th:text="${ev != null && ev.date != null ? ev.date : ''}">Date</span> à <span th:text="${ev != null && ev.location != null ? ev.location : ''}">Lieu</span>
+                            <div class="mt-1" th:if="${ev != null && ev.organizers != null && !#sets.isEmpty(ev.organizers)}">
+                                <span class="text-muted text-2xs">Organisé par :</span>
+                                <span class="badge bg-light text-secondary border text-2xs me-1" th:each="org : ${ev.organizers}" th:text="${org.firstName + ' ' + org.lastName}">Salma Alami</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item text-xs text-muted text-center py-3" th:if="${events == null || #lists.isEmpty(events)}">
+                            Aucun événement enregistré
+                        </li>
+                    </ul>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

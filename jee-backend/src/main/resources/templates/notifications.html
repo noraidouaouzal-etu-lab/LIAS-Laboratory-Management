@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Annonces et Notifications - Laboratoire LIAS')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebars Dynamic -->
+        <div th:replace="~{fragments :: sidebar-dynamic('notifications')}"></div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h4">📢 Annonces Institutionnelles & Flux d'Informations</h1>
+                <div class="btn-toolbar mb-2 mb-md-0" th:if="${not #lists.isEmpty(notifications)}">
+                    <form th:action="@{/notifications/read-all}" method="post" class="m-0">
+                        <button type="submit" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+                            ✔️ Tout marquer comme lu
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div th:each="notif : ${notifications}" class="card p-3 mb-3 border-start border-4 bg-white"
+                     th:style="${notif.read} ? 'border-left-color: #6c757d !important; opacity: 0.8;' : 'border-left-color: #0d6efd !important; font-weight: bold;'">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                                <span class="badge" th:classappend="${notif.read} ? 'bg-secondary' : 'bg-primary'"
+                                      th:text="${notif.read ? 'Lu' : 'Non lu'}">Non lu</span>
+                            <span class="badge bg-dark ms-1" th:text="${notif.type}">TYPE</span>
+                        </div>
+                        <small class="text-secondary font-mono text-xs"
+                               th:text="${notif.date != null ? #temporals.format(notif.date, 'dd/MM/yyyy HH:mm') : (notif.createdDate != null ? #temporals.format(notif.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A')}">17-06-2026</small>
+                    </div>
+                    <div class="mb-2">
+                        <h6 class="card-title text-sm fw-bold mb-1">
+                            <span th:if="${notif.type == 'NEW_ADHESION' || notif.type == 'ADHESION_REQUEST'}" th:text="'⏳ Nouvelle demande d''adhésion'"></span>
+                            <span th:if="${notif.type == 'ADHESION_ACCEPTED'}" th:text="'✅ Adhésion acceptée'"></span>
+                            <span th:if="${notif.type == 'ADHESION_REJECTED'}" th:text="'❌ Adhésion refusée'"></span>
+                            <span th:if="${notif.type == 'EQUIPMENT_REQUEST'}" th:text="'📦 Nouvelle demande de matériel'"></span>
+                            <span th:if="${notif.type == 'EQUIPMENT_APPROVED'}" th:text="'✔️ Demande de matériel approuvée'"></span>
+                            <span th:if="${notif.type == 'EQUIPMENT_REJECTED'}" th:text="'❌ Demande de matériel refusée'"></span>
+                            <span th:if="${notif.type == 'NEW_EVENT'}" th:text="'📅 Nouvel événement académique'"></span>
+                            <span th:if="${notif.type == 'NEW_PUBLICATION'}" th:text="'📚 Nouvelle publication scientifique'"></span>
+                            <span th:if="${notif.type == 'DOCUMENT_UPLOAD'}" th:text="'📄 Nouveau document disponible'"></span>
+                            <span th:if="${notif.type == 'PV_UPLOAD'}" th:text="'📋 Nouveau procès-verbal'"></span>
+                            <span th:if="${notif.type == 'CONVENTION_APPROVED'}" th:text="'🤝 Convention de partenariat approuvée'"></span>
+                            <span th:if="${notif.type != 'NEW_ADHESION' && notif.type != 'ADHESION_REQUEST' && notif.type != 'ADHESION_ACCEPTED' && notif.type != 'ADHESION_REJECTED' && notif.type != 'EQUIPMENT_REQUEST' && notif.type != 'EQUIPMENT_APPROVED' && notif.type != 'EQUIPMENT_REJECTED' && notif.type != 'NEW_EVENT' && notif.type != 'NEW_PUBLICATION' && notif.type != 'DOCUMENT_UPLOAD' && notif.type != 'PV_UPLOAD' && notif.type != 'CONVENTION_APPROVED'}" th:text="'🔔 Notification'"></span>
+                        </h6>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="text-sm text-dark mb-0 me-3" th:text="${notif.message}">Message d'annonce...</p>
+                        <form th:if="${!notif.read}" th:action="@{'/notifications/read/' + ${notif.id}}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-secondary btn-xs py-1 px-2 text-2xs" style="font-size: 11px;">✔️ Marquer comme lu</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(notifications)}" class="text-center py-5">
+                    <div class="text-muted fs-5 mb-2">📭</div>
+                    <p class="text-muted text-sm m-0">Aucune notification.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

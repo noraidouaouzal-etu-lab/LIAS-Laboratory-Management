@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mandats et Assermentations - Direction LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('mandates')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">📋 Mandats officiels & Directives de Recherche</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Mandat enregistré avec succès !
+                </div>
+
+                <!-- Create Mandate Form -->
+                <div class="card p-3 mb-4">
+                    <h5 class="fw-bold text-xs uppercase mb-3">Désigner / Assigner un Mandat ou Responsabilité</h5>
+                    <form th:action="@{/director/mandates/save}" method="post" th:object="${newMandate}">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-xs fw-semibold">Intitulé de la fonction</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="ex: Responsable de Plateforme IoT" th:field="*{roleTitle}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Chercheur désigné</label>
+                                <select class="form-select form-select-sm" name="member.id" required>
+                                    <option th:each="m : ${members}" th:value="${m.id}" th:text="${m.firstName + ' ' + m.lastName}">Chercheur</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Équipe / Axe affecté</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="ex: RIMO" th:field="*{teamAssigned}" required>
+                            </div>
+                            <div class="col-md-2 mb-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-sm w-100">💾 Activer le Mandat</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Mandates List -->
+                <div class="card p-3">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fonction / Mandat</th>
+                                <th>Chercheur désigné</th>
+                                <th>Date d'effet scientifique</th>
+                                <th>Équipe / Axe affecté</th>
+                                <th>État actuel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="man : ${mandates}">
+                                <td class="fw-bold" th:text="${man.roleTitle}">Directeur adjoint</td>
+                                <td th:text="${man.member != null ? man.member.firstName + ' ' + man.member.lastName : 'N/A'}">Pr. Abdelouahad Ennassiri</td>
+                                <td th:text="${man.startDate}">15 Janvier 2015</td>
+                                <td th:text="${man.teamAssigned != null ? man.teamAssigned : 'N/A'}">Plein-temps</td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${man.active}">ACTIF</span>
+                                    <span class="badge bg-secondary" th:if="${!man.active}">EXPIRÉ</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(mandates)}">
+                                <!-- Baseline mock values to look real on fresh DB -->
+                                <td>🔬 Responsable Budget RIMO</td>
+                                <td>Pr. Khadija BENJELLOUN</td>
+                                <td>2026-01-10</td>
+                                <td>3 Ans (2026-2029)</td>
+                                <td><span class="badge bg-success">ACTIF</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

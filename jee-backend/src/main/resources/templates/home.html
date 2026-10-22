@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Accueil - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <!-- Hero Section -->
+    <div class="py-5 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid var(--univ-gold);">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <!-- Left Side: Badges, Title, Subtitle, Buttons -->
+                <div class="col-lg-8 text-center text-lg-start">
+                    <div class="d-inline-flex flex-column flex-md-row align-items-center gap-2 mb-3 px-3 py-2 bg-white bg-opacity-10 rounded-pill border border-white border-opacity-10">
+                        <span class="badge text-uppercase tracking-wider px-2 py-1 bg-warning text-dark fw-bold" style="font-size: 0.75rem;">Université Hassan II de Casablanca</span>
+                        <span class="text-white-50 d-none d-md-inline">|</span>
+                        <span class="text-white fw-semibold" style="font-size: 0.8rem; letter-spacing: 0.3px;">Faculté des Sciences Ben M'Sik</span>
+                    </div>
+                    <h1 class="display-5 fw-bold text-white mb-3" style="font-family: Georgia, serif; letter-spacing: -0.5px; line-height: 1.25;">
+                        Laboratoire d'Intelligence Artificielle et Systèmes (LIAS)
+                    </h1>
+                    <p class="fs-5 mb-4 text-slate-300 opacity-90" style="color: #cbd5e1; font-weight: 400; line-height: 1.6;">
+                        Le Laboratoire d'Intelligence Artificielle et Systèmes (LIAS) est un laboratoire de recherche rattaché à la Faculté des Sciences Ben M'Sik de l'Université Hassan II de Casablanca. Il réunit enseignants-chercheurs, doctorants et chercheurs associés autour de projets innovants en Intelligence Artificielle, Data Science, systèmes intelligents, Internet des Objets (IoT), systèmes embarqués et transformation numérique.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="/login" class="btn btn-warning btn-lg px-4 py-3 fw-bold text-dark shadow-sm border-0 d-flex align-items-center justify-content-center gap-2" style="background-color: #f59e0b; transition: var(--transition-smooth);">
+                            <i class="bi bi-box-arrow-in-right fs-5"></i> Accéder au Portail LIAS
+                        </a>
+                        <a href="/adhesions/apply" class="btn btn-outline-light btn-lg px-4 py-3 fw-semibold d-flex align-items-center justify-content-center gap-2" style="transition: var(--transition-smooth);">
+                            <i class="bi bi-file-earmark-plus fs-5"></i> Déposer une demande d'adhésion
+                        </a>
+                        <a href="/adhesion-status" class="btn btn-outline-info btn-lg px-4 py-3 fw-semibold text-white border-info d-flex align-items-center justify-content-center gap-2" style="transition: var(--transition-smooth);">
+                            <i class="bi bi-search fs-5"></i> Suivre une demande
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Side: Both Official Logos -->
+                <div class="col-lg-4 mt-4 mt-lg-0">
+                    <div class="d-flex flex-column gap-3 justify-content-center align-items-center">
+                        <!-- Top Card: Official LIAS Logo -->
+                        <div class="card border-0 shadow-lg rounded-4 p-3 bg-white w-100 text-center d-flex align-items-center justify-content-center" style="height: 150px; max-width: 320px;">
+                            <img th:src="@{/images/lias_logo.jpeg}" alt="Official LIAS Logo" class="img-fluid" style="max-height: 110px; width: auto; object-fit: contain;">
+                        </div>
+                        <!-- Bottom Card: Official FSBM Logo -->
+                        <div class="card border-0 shadow-lg rounded-4 p-3 bg-white w-100 text-center d-flex align-items-center justify-content-center" style="height: 150px; max-width: 320px;">
+                            <img th:src="@{/images/logo.png}" alt="Official FSBM Logo" class="img-fluid" style="max-height: 110px; width: auto; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        
+        <!-- LIAS Presentation Block -->
+        <div class="row mb-5" id="presentation">
+            <div class="col-12">
+                <div class="card p-4 p-md-5 border-0 shadow-sm" style="border-radius: 16px !important; background-color: #ffffff;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-12">
+                            <h2 class="fw-bold mb-4 text-dark d-flex align-items-center gap-2" style="font-family: Georgia, serif; font-size: 1.85rem;">
+                                <i class="bi bi-info-circle-fill text-primary" style="font-size: 1.6rem;"></i> Présentation du Laboratoire
+                            </h2>
+                            <p class="text-secondary leading-relaxed mb-3" style="font-size: 1rem; line-height: 1.75;">
+                                Le <strong>Laboratoire d'Intelligence Artificielle et Systèmes (LIAS)</strong> est un laboratoire de recherche de la Faculté des Sciences Ben M'Sik, Université Hassan II de Casablanca. Il développe des activités de recherche scientifique, d'innovation et de transfert technologique dans les domaines de l'Intelligence Artificielle, du Machine Learning, de la Science des Données, des Systèmes Intelligents, de l'Internet des Objets (IoT), des systèmes embarqués et de la transformation numérique.
+                            </p>
+                            <p class="text-secondary leading-relaxed mb-4" style="font-size: 1rem; line-height: 1.75;">
+                                Le laboratoire favorise les collaborations nationales et internationales, accompagne les doctorants et participe à de nombreux projets de recherche ainsi qu'à l'organisation de conférences, séminaires et workshops scientifiques.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4 pt-4 border-top mt-2">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center border border-light">
+                                <h4 class="fw-extrabold mb-1" style="color: var(--univ-brand); font-weight: 800; font-size: 1.75rem;" th:text="${teamCount}">3</h4>
+                                <span class="text-xs text-uppercase text-secondary fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Axes Scientifiques</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center border border-light">
+                                <h4 class="fw-extrabold mb-1" style="color: #059669; font-weight: 800; font-size: 1.75rem;" th:text="${publicationCount}">50+</h4>
+                                <span class="text-xs text-uppercase text-secondary fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Publications</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center border border-light">
+                                <h4 class="fw-extrabold mb-1" style="color: #0d9488; font-weight: 800; font-size: 1.75rem;" th:text="${memberCount}">15+</h4>
+                                <span class="text-xs text-uppercase text-secondary fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Chercheurs &amp; Doctorants</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 text-center border border-light">
+                                <h4 class="fw-extrabold mb-1" style="color: var(--univ-gold); font-weight: 800; font-size: 1.75rem;">FSBM</h4>
+                                <span class="text-xs text-uppercase text-secondary fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Faculté Affiliée</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Laboratory Pillars (Four Modern Cards) -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-5" id="pillars">
+            <!-- Card 1: Mission -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-white" style="transition: transform 0.2s; box-shadow: var(--card-shadow);">
+                    <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-3 mb-3" style="width: 50px; height: 50px;">
+                        <span class="fs-4">🎯</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">Mission</h5>
+                    <p class="text-secondary small mb-0" style="line-height: 1.6; font-size: 0.85rem;">
+                        Promouvoir une recherche scientifique de haut niveau, développer des solutions innovantes basées sur l'Intelligence Artificielle et renforcer les collaborations académiques et industrielles.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card 2: Vision -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-white" style="transition: transform 0.2s; box-shadow: var(--card-shadow);">
+                    <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3 mb-3" style="width: 50px; height: 50px;">
+                        <span class="fs-4">👁</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">Vision</h5>
+                    <p class="text-secondary small mb-0" style="line-height: 1.6; font-size: 0.85rem;">
+                        Être un laboratoire de référence au Maroc et à l'international dans les domaines de l'Intelligence Artificielle et des Systèmes Intelligents.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Card 3: Domaines de Recherche -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-white" style="transition: transform 0.2s; box-shadow: var(--card-shadow);">
+                    <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-3 mb-3" style="width: 50px; height: 50px;">
+                        <span class="fs-4">🔬</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">Domaines de Recherche</h5>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2" style="font-size: 0.825rem;">
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Artificial Intelligence
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Machine Learning
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Deep Learning
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Data Science
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Internet of Things (IoT)
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Embedded Systems
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Decision Support Systems
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Smart Cities
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-chevron-right text-success" style="font-size: 0.7rem;"></i> Transformation Digitale
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card 4: Collaborations -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-4 bg-white" style="transition: transform 0.2s; box-shadow: var(--card-shadow);">
+                    <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded-3 mb-3" style="width: 50px; height: 50px;">
+                        <span class="fs-4">🤝</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">Collaborations</h5>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-2" style="font-size: 0.825rem;">
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-link-45deg text-warning" style="font-size: 0.85rem;"></i> Université Hassan II
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-link-45deg text-warning" style="font-size: 0.85rem;"></i> FSBM
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-link-45deg text-warning" style="font-size: 0.85rem;"></i> Laboratoires partenaires
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-link-45deg text-warning" style="font-size: 0.85rem;"></i> Projets nationaux
+                        </li>
+                        <li class="d-flex align-items-center gap-2 text-secondary">
+                            <i class="bi bi-link-45deg text-warning" style="font-size: 0.85rem;"></i> Projets internationaux
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Teams Section -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold mb-0 text-dark" style="font-family: Georgia, serif;">
+                    <i class="fa-solid fa-users me-2" style="color: var(--univ-brand);"></i> Nos Équipes &amp; Axes Thématiques
+                </h3>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4" th:each="team : ${teams}">
+                    <div class="card h-100 p-4 border-0 shadow-sm d-flex flex-column justify-content-between" style="border-radius: 12px !important;">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center border" style="width: 44px; height: 44px; background-color: #eff6ff; color: var(--univ-brand);">
+                                    <i class="fa-solid fa-flask-vial"></i>
+                                </div>
+                                <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;" th:text="${team.name}">Nom équipe</h5>
+                            </div>
+                            <p class="text-secondary small mb-3" style="font-size: 0.85rem;" th:text="${team.description}">Description équipe de recherche du LIAS</p>
+                        </div>
+                        <div class="pt-3 border-top text-xs text-muted d-flex justify-content-between align-items-center" style="font-size: 11px;">
+                            <span>Axe de recherche</span>
+                            <span class="text-uppercase fw-bold" style="color: var(--univ-brand);">Actif</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 text-center py-4" th:if="${#lists.isEmpty(teams)}">
+                    <p class="text-muted text-xs">Aucune équipe thématique de recherche disponible.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Events & Publications Row -->
+        <div class="row g-4">
+            
+            <!-- Left Column: Public Events -->
+            <div class="col-lg-6">
+                <div class="card p-4 border-0 h-100 shadow-sm" style="border-radius: 12px !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+                        <h4 class="fw-bold text-dark mb-0" style="font-family: Georgia, serif;">
+                            <i class="fa-solid fa-calendar-check me-2" style="color: var(--univ-brand);"></i> Activités &amp; Événements Académiques
+                        </h4>
+                        <span class="badge text-dark" style="background-color: #e2e8f0;">Séminaires</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 bg-light rounded border d-flex gap-3 align-items-start" th:each="event : ${events}">
+                            <div class="text-white text-center p-2 rounded fw-bold" style="min-width: 65px; background-color: var(--univ-brand); font-size: 11px;">
+                                <i class="fa-regular fa-calendar mb-1 d-block"></i>
+                                <span th:text="${event.date}">12/05/2026</span>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.925rem;" th:text="${event.title}">Titre de l'évènement</h6>
+                                <p class="text-xs text-secondary mb-2" style="font-size: 0.8rem;" th:text="${event.description}">Description sommaire</p>
+                                <div class="d-flex gap-3 text-xs text-muted" style="font-size: 11px;">
+                                    <span><i class="fa-solid fa-location-dot text-danger me-1"></i> <span th:text="${event.location}">Casablanca</span></span>
+                                    <span><i class="fa-solid fa-tag me-1"></i> <span th:text="${event.type}">TYPE</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center py-4 text-muted" th:if="${#lists.isEmpty(events)}">
+                            <p class="text-xs mb-0">Aucun événement ou conférence planifiée.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Public Publications -->
+            <div class="col-lg-6">
+                <div class="card p-4 border-0 h-100 shadow-sm" style="border-radius: 12px !important;">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+                        <h4 class="fw-bold text-dark mb-0" style="font-family: Georgia, serif;">
+                            <i class="fa-solid fa-book-open me-2" style="color: var(--univ-brand);"></i> Dernières Publications Scientifiques
+                        </h4>
+                        <span class="badge text-dark" style="background-color: #e2e8f0;">Revues</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 bg-light rounded border" th:each="pub : ${publications}">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge bg-dark font-monospace text-white" th:text="${pub.year}">2026</span>
+                                <span class="badge bg-white text-secondary border font-sans" th:text="${pub.team}">Axe</span>
+                            </div>
+                            <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.9rem;" th:text="${pub.title}">Titre de la publication scientifique</h6>
+                            <p class="text-xs mb-0 fw-medium text-primary"><i class="fa-solid fa-user-pen me-1 text-secondary"></i> <span th:text="${pub.author}">Auteurs</span></p>
+                        </div>
+
+                        <div class="text-center py-4 text-muted" th:if="${#lists.isEmpty(publications)}">
+                            <p class="text-xs mb-0">Aucune publication récente répertoriée.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Contact Section -->
+        <div class="row mt-5" id="contact">
+            <div class="col-12">
+                <div class="card p-4 border-0 shadow-sm" style="border-radius: 12px !important; border-top: 4px solid var(--univ-gold) !important;">
+                    <h3 class="fw-bold mb-4 d-flex align-items-center gap-2 text-dark" style="font-family: Georgia, serif;">
+                        <i class="fa-solid fa-envelope" style="color: var(--univ-brand);"></i> Contactez le Laboratoire LIAS
+                    </h3>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="p-2.5 rounded bg-light text-primary border" style="font-size: 1.15rem;">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1">Adresse</h6>
+                                    <p class="text-secondary small mb-0" style="line-height: 1.4;">
+                                        Faculté des Sciences Ben M'Sik<br>
+                                        B.P. 7955, Bd. Commandant Driss El Harti, Sidi Othmane, Casablanca, Maroc.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="p-2.5 rounded bg-light text-warning border" style="font-size: 1.15rem;">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1">Téléphone &amp; Fax</h6>
+                                    <p class="text-secondary small mb-0" style="line-height: 1.4;">
+                                        Tél : +212 (0) 5 22 70 46 71<br>
+                                        Fax : +212 (0) 5 22 70 46 75
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="p-2.5 rounded bg-light text-success border" style="font-size: 1.15rem;">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1">E-mail de contact</h6>
+                                    <p class="text-secondary small mb-0" style="line-height: 1.4;">
+                                        contact@lias-lab.ma<br>
+                                        director@lias-lab.ma
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-5 bg-white border-top">
+        <div class="container text-center">
+            <p class="small text-secondary mb-1">© 2026 Laboratoire LIAS - Faculté des Sciences Ben M'Sik</p>
+            <p class="text-xs text-muted" style="font-size: 11px;">Université Hassan II de Casablanca, Royaume du Maroc.</p>
+        </div>
+    </footer>
+</body>
+</html>

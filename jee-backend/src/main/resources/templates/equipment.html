@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Parc Matériels et Logistique - Direction LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-director('equipment')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🛡️ Suivi du Parc Matériels sensibles (Calculateurs GPU & IoT)</h1>
+                </div>
+
+                <!-- Dashboard Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm text-center">
+                            <span class="text-xs text-muted uppercase fw-bold">Total Equipments</span>
+                            <h3 class="fw-bold text-dark mt-2" th:text="${totalEquipmentCount != null ? totalEquipmentCount : '0'}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm text-center">
+                            <span class="text-xs text-muted uppercase fw-bold">Available</span>
+                            <h3 class="fw-bold text-success mt-2" th:text="${availableEquipmentCount != null ? availableEquipmentCount : '0'}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm text-center">
+                            <span class="text-xs text-muted uppercase fw-bold">Assigned</span>
+                            <h3 class="fw-bold text-primary mt-2" th:text="${assignedEquipmentCount != null ? assignedEquipmentCount : '0'}">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3 border border-secondary border-opacity-10 shadow-sm text-center">
+                            <span class="text-xs text-muted uppercase fw-bold">Pending Requests</span>
+                            <h3 class="fw-bold text-warning mt-2" th:text="${pendingRequestsCount != null ? pendingRequestsCount : '0'}">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Équipement inventorié avec succès !
+                </div>
+
+                <!-- Create Equipment Form -->
+                <div class="card p-3 mb-4">
+                    <h5 class="fw-bold text-xs uppercase mb-3" id="form-title">Enregistrer un nouvel équipement / composant</h5>
+                    <form th:action="@{/director/equipment/save}" method="post" th:object="${newEquipment}">
+                        <input type="hidden" id="edit-id" th:field="*{id}">
+                        <div class="row mb-2">
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Dénomination du matériel</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-name" placeholder="ex: Nvidia Jetson Orin Nano" th:field="*{name}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Catégorie</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-category" th:field="*{category}" list="categories-list" required>
+                                <datalist id="categories-list">
+                                    <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                                    <option value="Calculateur GPU">Calculateur GPU</option>
+                                    <option value="IoT & Capteurs">IoT & Capteurs</option>
+                                    <option value="Réseau & Serveur">Réseau & Serveur</option>
+                                    <option value="Ordinateur & Terminal">Ordinateur & Terminal</option>
+                                    <option value="Autre">Autre</option>
+                                </datalist>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label text-xs fw-semibold">Quantité reçue</label>
+                                <input type="number" class="form-control form-control-sm" id="edit-quantity" th:field="*{quantity}" required min="1">
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label text-xs fw-semibold">Date d'Arrivée</label>
+                                <input type="date" class="form-control form-control-sm" id="edit-arrivalDate" th:field="*{arrivalDate}" required>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label text-xs fw-semibold">Localisation</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-location" placeholder="ex: Salle 5, Bureau 12" th:field="*{location}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-10 mb-2">
+                                <label class="form-label text-xs fw-semibold">Description / Remarques</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-description" placeholder="ex: GPU 1024 cœurs CUDA pour l'edge computing" th:field="*{description}">
+                            </div>
+                            <div class="col-md-2 mb-2 d-flex align-items-end gap-1">
+                                <button type="button" id="cancel-edit-btn" class="btn btn-outline-secondary btn-sm" style="display: none;" onclick="clearEditForm()">Annuler</button>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">💾 Enregistrer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Equipment Table -->
+                <div class="card p-3 mb-4">
+                    <h5 class="fw-bold text-xs uppercase mb-3">📦 Inventaire Global des Matériels</h5>
+                    <table class="table table-hover mb-0 text-xs">
+                        <thead>
+                            <tr>
+                                <th>Désignation du Matériel</th>
+                                <th>Catégorie</th>
+                                <th>Quantité globale</th>
+                                <th>Date d'Arrivée</th>
+                                <th>Statut logistique</th>
+                                <th>Localisation</th>
+                                <th>Chercheurs assignés</th>
+                                <th th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="equip : ${equipmentList}">
+                                <td class="fw-bold text-dark" th:text="${equip != null && equip.name != null ? equip.name : 'Matériel'}">Sondeur RFID</td>
+                                <td th:text="${equip != null && equip.category != null ? equip.category : 'Autre'}">GPU</td>
+                                <td th:text="${equip != null ? equip.quantity : '0'}">1</td>
+                                <td th:text="${equip != null && equip.arrivalDate != null ? equip.arrivalDate : 'Non renseignée'}" class="font-mono">2026-06-24</td>
+                                <td>
+                                    <span th:class="${'badge ' + (equip != null && (equip.status == null || equip.status == 'AVAILABLE') ? 'bg-success' : 'bg-primary')}" 
+                                          th:text="${equip != null && equip.status != null ? equip.status : 'AVAILABLE'}">AVAILABLE</span>
+                                </td>
+                                <td th:text="${equip != null && equip.location != null ? equip.location : 'Non spécifié'}">Salle de calcul</td>
+                                <td>
+                                    <div th:each="asg : ${assignments}" th:if="${asg != null && asg.equipment != null && equip != null && asg.equipment.id == equip.id}">
+                                        <span class="badge bg-light text-dark border mb-1" th:text="${asg.member != null ? (asg.member.firstName + ' ' + asg.member.lastName) : 'Chercheur'}">Salma Alami</span>
+                                    </div>
+                                    <span th:if="${assignments == null || #lists.isEmpty(assignments.?[equipment != null && equipment.id == __${equip.id}__])}" class="text-muted text-2xs italic">Aucun</span>
+                                </td>
+                                <td th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="btn btn-outline-primary btn-xs py-1 px-2 font-semibold" style="font-size: 11px;" title="Modifier"
+                                                th:data-id="${equip.id}"
+                                                th:data-name="${equip.name != null ? equip.name : ''}"
+                                                th:data-category="${equip.category != null ? equip.category : ''}"
+                                                th:data-quantity="${equip.quantity}"
+                                                th:data-arrivaldate="${equip.arrivalDate != null ? equip.arrivalDate : ''}"
+                                                th:data-description="${equip.description != null ? equip.description : ''}"
+                                                th:data-location="${equip.location != null ? equip.location : ''}"
+                                                onclick="editEquipment(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-category'), this.getAttribute('data-quantity'), this.getAttribute('data-arrivaldate'), this.getAttribute('data-description'), this.getAttribute('data-location'))">✏️ Modifier</button>
+                                        <form th:action="@{/director/equipment/delete/{id}(id=${equip.id})}" method="post" onsubmit="return confirm('Voulez-vous vraiment supprimer cet équipement ?');" class="m-0">
+                                            <button type="submit" class="btn btn-outline-danger btn-xs py-1 px-2 font-semibold" style="font-size: 11px;" title="Supprimer">🗑️ Supprimer</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(equipmentList)}">
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    Aucun équipement enregistré.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Equipment Requests Panel (Requirement 13) -->
+                <div class="card p-3 mb-4 border-warning border-opacity-25" th:if="${equipmentRequests != null}">
+                    <h5 class="fw-bold text-xs uppercase text-warning mb-3">📥 Demandes de matériels des chercheurs</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Chercheur</th>
+                                    <th>Matériel demandé</th>
+                                    <th>Quantité</th>
+                                    <th>Date Demande</th>
+                                    <th>Statut</th>
+                                    <th>Actions de validation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="req : ${equipmentRequests}">
+                                    <td class="fw-semibold" th:text="${req != null && req.member != null ? ((req.member.firstName != null ? req.member.firstName : '') + ' ' + (req.member.lastName != null ? req.member.lastName : '')) : 'Chercheur'}">Nom</td>
+                                    <td th:text="${req != null && req.equipmentName != null ? req.equipmentName : ''}">Nvidia Jetson</td>
+                                    <td th:text="${req != null ? req.quantity : '0'}">1</td>
+                                    <td th:text="${req != null ? req.requestDate : ''}">Date</td>
+                                    <td>
+                                        <span th:class="${'badge ' + (req != null && req.status == 'APPROVED' ? 'bg-success' : (req != null && req.status == 'REJECTED' ? 'bg-danger' : 'bg-warning'))}" th:text="${req != null ? req.status : ''}">STATUS</span>
+                                    </td>
+                                    <td>
+                                        <div th:if="${req != null && req.status == 'PENDING'}" class="d-flex gap-1">
+                                            <form th:action="@{/director/equipment/requests/approve/{id}(id=${req != null ? req.id : 0})}" method="post">
+                                                <button type="submit" class="btn btn-success btn-xs px-2" style="font-size:10px;">✅ Approuver</button>
+                                            </form>
+                                            <form th:action="@{/director/equipment/requests/reject/{id}(id=${req != null ? req.id : 0})}" method="post">
+                                                <button type="submit" class="btn btn-danger btn-xs px-2" style="font-size:10px;">❌ Rejeter</button>
+                                            </form>
+                                        </div>
+                                        <div th:if="${req != null && req.status != 'PENDING'}">
+                                            <span class="text-xs text-muted">Traité le <span th:text="${req != null && req.decisionDate != null ? req.decisionDate : ''}"></span></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(equipmentRequests)}">
+                                    <td colspan="6" class="text-center text-muted py-3 text-xs">Aucune demande de matériel.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Assignments & Distribution (Requirement 12) -->
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <div class="card p-3 mb-4 h-100">
+                            <h5 class="fw-bold text-xs uppercase text-secondary mb-3">🕒 Affectations historiques & Distributions</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 text-xs">
+                                    <thead>
+                                        <tr>
+                                            <th>Matériel</th>
+                                            <th>Détenteur</th>
+                                            <th>Date Affectation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="asg : ${assignments}">
+                                            <td class="fw-bold" th:text="${asg != null && asg.equipment != null ? asg.equipment.name : 'Matériel'}">Nvidia</td>
+                                            <td th:text="${asg != null && asg.member != null ? ((asg.member.firstName != null ? asg.member.firstName : '') + ' ' + (asg.member.lastName != null ? asg.member.lastName : '')) : 'Chercheur'}">Salma</td>
+                                            <td th:text="${asg != null && asg.distributionDate != null ? asg.distributionDate : ''}">Date</td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(assignments)}">
+                                            <td colspan="3" class="text-center text-muted py-3 text-xs">Aucun historique de distribution disponible.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Who has vs hasn't received (Requirement 12) -->
+                    <div class="col-md-5">
+                        <div class="card p-3 mb-4 h-100">
+                            <h5 class="fw-bold text-xs uppercase text-secondary mb-3">📋 Registre logistique des Chercheurs</h5>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-xs fw-bold text-success border-bottom pb-1 mb-2">🟢 Chercheurs équipés (<span th:text="${membersWhoReceived != null ? #lists.size(membersWhoReceived) : 0}"></span>)</h6>
+                                <ul class="list-unstyled mb-0" style="font-size: 11px;">
+                                    <li class="py-1" th:each="m : ${membersWhoReceived}">
+                                        <i class="fa-solid fa-circle-check text-success me-1"></i>
+                                        <span th:text="${m != null ? ((m.firstName != null ? m.firstName : '') + ' ' + (m.lastName != null ? m.lastName : '')) : ''}">BENJELLOUN</span>
+                                    </li>
+                                    <li th:if="${membersWhoReceived == null || #lists.isEmpty(membersWhoReceived)}" class="text-muted italic">Aucun pour le moment.</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h6 class="text-xs fw-bold text-danger border-bottom pb-1 mb-2">🔴 Chercheurs en attente d'attribution (<span th:text="${membersWhoDidNotReceive != null ? #lists.size(membersWhoDidNotReceive) : 0}"></span>)</h6>
+                                <ul class="list-unstyled mb-0" style="font-size: 11px;">
+                                    <li class="py-1" th:each="m : ${membersWhoDidNotReceive}">
+                                        <i class="fa-solid fa-clock text-danger me-1"></i>
+                                        <span th:text="${m != null ? ((m.firstName != null ? m.firstName : '') + ' ' + (m.lastName != null ? m.lastName : '')) : ''}">ALAMI</span>
+                                    </li>
+                                    <li th:if="${membersWhoDidNotReceive == null || #lists.isEmpty(membersWhoDidNotReceive)}" class="text-muted italic">Tous les chercheurs sont équipés.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+        function editEquipment(id, name, category, quantity, arrivalDate, description, location) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-category').value = category;
+            document.getElementById('edit-quantity').value = quantity;
+            document.getElementById('edit-arrivalDate').value = arrivalDate || '';
+            document.getElementById('edit-description').value = description || '';
+            document.getElementById('edit-location').value = location || '';
+            
+            document.getElementById('form-title').innerText = "Modifier l'équipement : " + name;
+            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+            
+            document.getElementById('edit-name').focus();
+        }
+
+        function clearEditForm() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-name').value = '';
+            document.getElementById('edit-category').value = 'Calculateur GPU';
+            document.getElementById('edit-quantity').value = '1';
+            document.getElementById('edit-arrivalDate').value = '';
+            document.getElementById('edit-description').value = '';
+            document.getElementById('edit-location').value = '';
+            
+            document.getElementById('form-title').innerText = "Enregistrer un nouvel équipement / composant";
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

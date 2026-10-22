@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Portail d\'Authentification Académique - LIAS')}"></head>
+<body class="d-flex align-items-center justify-content-center bg-white" style="min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                
+                <!-- University Academic Identity Header -->
+                <div class="text-center mb-4">
+                    <img th:src="@{/images/logo.png}" alt="Laboratoire LIAS Logo" class="lias-logo mx-auto mb-2">
+                    <div class="mt-3">
+                        <span class="badge bg-opacity-10 text-uppercase fw-bold px-3 py-1.5" style="background-color: rgba(15, 23, 42, 0.08); color: var(--univ-blue); letter-spacing: 1px; font-size: 11px;">
+                            Portail d'Accès Sécurisé
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Main Login Card -->
+                <div class="card border border-light p-4 shadow-lg bg-white" style="border-radius: 12px !important; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;">
+                    
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold m-0" style="color: var(--univ-blue); font-family: 'Georgia', serif; font-size: 1.35rem;">Laboratoire LIAS</h4>
+                        <p class="text-xs text-muted m-0 mt-1" style="font-size: 11.5px; letter-spacing: 0.5px;">Faculté des Sciences Ben M'Sik</p>
+                        <div class="mt-2 mx-auto" style="width: 50px; height: 3px; background: var(--univ-gold); border-radius: 2px;"></div>
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <!-- Alerts -->
+                        <div th:if="${param.error}" class="alert alert-danger py-2 text-center border-0 font-mono" style="font-size: 11.5px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle-exclamation me-1.5"></i> Identifiants universitaires incorrects.
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-info py-2 text-center border-0 font-mono" style="font-size: 11.5px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle-info me-1.5"></i> Déconnection effectuée avec succès.
+                        </div>
+                        <div th:if="${param.registered}" class="alert alert-success py-2 text-center border-0 font-mono" style="font-size: 11.5px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle-check me-1.5"></i> Compte créé ! Connectez-vous.
+                        </div>
+                        <div th:if="${param.passwordChanged}" class="alert alert-success py-2 text-center border-0 font-mono" style="font-size: 11.5px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle-check me-1.5"></i> Mot de passe mis à jour ! Connectez-vous.
+                        </div>
+
+                        <!-- Email/Username -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Email universitaire (ou Identifiant)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-envelope" style="font-size: 12px;"></i></span>
+                                <input type="text" class="form-control border-start-0 text-sm" id="username" name="username" placeholder="ex: director@lias-lab.ma" required autocomplete="username" style="font-size: 13px; font-weight: 500;">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-lock" style="font-size: 12px;"></i></span>
+                                <input type="password" class="form-control border-start-0 text-sm" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" style="font-size: 13px; font-weight: 500;">
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold text-uppercase d-flex align-items-center justify-content-center gap-2" 
+                                style="font-size: 12px; letter-spacing: 1px; background-color: var(--univ-blue) !important; border-color: var(--univ-blue) !important;">
+                            <span>Se connecter</span> <i class="fa-solid fa-arrow-right-to-bracket" style="font-size: 12px;"></i>
+                        </button>
+                    </form>
+
+                    <!-- Register Link -->
+                    <div class="text-center mt-3 pt-2 border-top">
+                        <span class="text-muted" style="font-size: 11px;">Pas encore de compte ?</span>
+                        <a th:href="@{/adhesion-apply}" class="text-decoration-none fw-bold ms-1 text-sm" style="color: var(--univ-blue); font-size: 11.5px;">Créer un compte</a>
+                    </div>
+                </div>
+
+                <!-- Footer back link -->
+                <div class="text-center mt-4">
+                    <a th:href="@{/home}" class="text-decoration-none fw-semibold" style="color: var(--univ-blue); font-size: 12px;">
+                        <i class="fa-solid fa-house me-1"></i> Retour à l'accueil du Laboratoire
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

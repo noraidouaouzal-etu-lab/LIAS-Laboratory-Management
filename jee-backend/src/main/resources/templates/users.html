@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Gestion Utilisateurs - Administration LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div th:replace="~{fragments :: sidebar-admin('users')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">👥 Comptes d'Utilisateurs du Laboratoire</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Nouvel utilisateur académique enregistré avec succès !
+                </div>
+                <div th:if="${param.toggled}" class="alert alert-info py-2 text-xs">
+                    Statut de connexion de l'utilisateur modifié avec succès.
+                </div>
+
+                <!-- Create User Form -->
+                <div class="card p-3 mb-4">
+                    <h5 class="fw-bold text-xs uppercase mb-3">Créer et Habiliter un nouvel accès</h5>
+                    <form th:action="@{/admin/users/save}" method="post" th:object="${newUser}">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Identifiant</label>
+                                <input type="text" class="form-control form-control-sm" placeholder="ex: j_benjelloun" th:field="*{username}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Adresse Email</label>
+                                <input type="email" class="form-control form-control-sm" placeholder="ex: j.ben@gmail.com" th:field="*{email}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Mot de passe temporaire</label>
+                                <input type="password" class="form-control form-control-sm" placeholder="••••••••" th:field="*{password}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Attribuer un Rôle de sécurité</label>
+                                <select class="form-select form-select-sm" name="roleId">
+                                    <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}">ROLE_MEMBER</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-end">
+                            <button type="submit" class="btn btn-primary btn-sm px-4">💾 Créer l'accès</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card p-3">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom d'Utilisateur</th>
+                                <th>Email</th>
+                                <th>Rôles assignés</th>
+                                <th>État du de connexion</th>
+                                <th>Habilitation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${users}">
+                                <td th:text="${u.id}">1</td>
+                                <td class="fw-bold" th:text="${u.username}">director</td>
+                                <td th:text="${u.email}">director@lias-lab.ma</td>
+                                <td>
+                                    <!-- Display user roles -->
+                                    <span class="badge bg-secondary font-mono text-xs uppercase" th:each="r : ${u.roles}" th:text="${r.name}">ROLE_DIRECTOR</span>
+                                    <span class="badge bg-secondary font-mono text-xs uppercase" th:if="${#lists.isEmpty(u.roles)}">ROLE_MEMBER</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${u.enabled}">ACTIF / ACTIVÉ</span>
+                                    <span class="badge bg-danger" th:if="${!u.enabled}">SUSPENDU / INACTIF</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{'/admin/users/toggle/' + ${u.id}}" method="post" class="d-inline">
+                                        <button type="submit" th:class="${'btn btn-sm btn-xs ' + (u.enabled ? 'btn-outline-danger' : 'btn-outline-success')}" 
+                                                th:text="${u.enabled ? '⛔ Suspendre' : '✔️ Activer'}" style="font-size: 11px;">Toggle</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

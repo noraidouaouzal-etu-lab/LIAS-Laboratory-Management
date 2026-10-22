@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Conseil Gouvernance - Direction LIAS')}"></head>
+<body>
+    <!-- Simple Top Navbar -->
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Dynamic Sidebar -->
+            <div th:replace="~{fragments :: sidebar-dynamic('governance')}"></div>
+
+            <!-- Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🏛️ Conseil de Gouvernance & Direction LIAS</h1>
+                </div>
+
+                <!-- Section 1: Current Mandate -->
+                <h5 class="fw-bold text-dark mb-3">👑 Mandat de Direction Actuel</h5>
+                <div class="row mb-4">
+                    <!-- Director Card -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card p-4 h-100 shadow-sm border-0 bg-white">
+                            <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom">
+                                <div class="bg-warning bg-opacity-10 p-2.5 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <span class="fs-4">👑</span>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-dark">Directeur du Laboratoire</h5>
+                                    <p class="text-xs text-muted mb-0">Responsable scientifique & académique</p>
+                                </div>
+                            </div>
+                            
+                            <div th:if="${dirMandate != null}">
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold text-secondary d-block">Nom du Directeur</label>
+                                    <div class="p-2 bg-light border text-sm rounded fw-bold text-dark" 
+                                         th:text="${dirMandate.member != null ? dirMandate.member.firstName + ' ' + dirMandate.member.lastName : 'N/A'}">
+                                        Pr. Abdelouahad ENNASSIRI
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label text-xs fw-semibold text-secondary d-block">Date Début</label>
+                                        <span class="font-mono text-xs text-dark" th:text="${dirMandate.startDate}">2026-01-01</span>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label text-xs fw-semibold text-secondary d-block">Date Fin</label>
+                                        <span class="font-mono text-xs text-dark" th:text="${dirMandate.endDate != null ? dirMandate.endDate : 'N/A'}">N/A</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label text-xs fw-semibold text-secondary d-block">État du Mandat</label>
+                                    <span class="badge bg-success" th:if="${dirMandate.active}">ACTIVE</span>
+                                    <span class="badge bg-secondary" th:if="${!dirMandate.active}">FINISHED</span>
+                                </div>
+                            </div>
+                            <div th:if="${dirMandate == null}" class="text-center py-4 text-muted text-xs bg-light rounded border">
+                                Aucun mandat de directeur actif.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vice Director Card -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card p-4 h-100 shadow-sm border-0 bg-white">
+                            <div class="d-flex align-items-center gap-3 mb-3 pb-2 border-bottom">
+                                <div class="bg-primary bg-opacity-10 p-2.5 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                    <span class="fs-4">⭐</span>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-dark">Vice-Directeur / Directrice</h5>
+                                    <p class="text-xs text-muted mb-0">Coordination & Relations Industrielles</p>
+                                </div>
+                            </div>
+
+                            <div th:if="${vdirMandate != null}">
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold text-secondary d-block">Nom du Vice-Directeur</label>
+                                    <div class="p-2 bg-light border text-sm rounded fw-bold text-dark" 
+                                         th:text="${vdirMandate.member != null ? vdirMandate.member.firstName + ' ' + vdirMandate.member.lastName : 'N/A'}">
+                                        Pr. Khadija BENJELLOUN
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label text-xs fw-semibold text-secondary d-block">Date Début</label>
+                                        <span class="font-mono text-xs text-dark" th:text="${vdirMandate.startDate}">2026-01-01</span>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="form-label text-xs fw-semibold text-secondary d-block">Date Fin</label>
+                                        <span class="font-mono text-xs text-dark" th:text="${vdirMandate.endDate != null ? vdirMandate.endDate : 'N/A'}">N/A</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label text-xs fw-semibold text-secondary d-block">État du Mandat</label>
+                                    <span class="badge bg-success" th:if="${vdirMandate.active}">ACTIVE</span>
+                                    <span class="badge bg-secondary" th:if="${!vdirMandate.active}">FINISHED</span>
+                                </div>
+                            </div>
+                            <div th:if="${vdirMandate == null}" class="text-center py-4 text-muted text-xs bg-light rounded border">
+                                Aucun mandat de vice-directeur actif.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Research team leaders -->
+                <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                        <span class="fs-5">🔬</span>
+                        <h5 class="fw-bold text-sm mb-0 text-dark">Responsables des Équipes de Recherche</h5>
+                    </div>
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(teamLeaders)}">
+                        <table class="table table-sm table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Équipe / Axe de Recherche</th>
+                                    <th>Chef d'Équipe / Leader</th>
+                                    <th>Date d'effet scientifique</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="tl : ${teamLeaders}">
+                                    <td class="fw-bold text-dark" th:text="${tl.teamAssigned != null ? tl.teamAssigned : (tl.member != null && tl.member.team != null ? tl.member.team.name : 'N/A')}">Équipe</td>
+                                    <td class="text-muted" th:text="${tl.member != null ? tl.member.firstName + ' ' + tl.member.lastName : 'N/A'}">Leader</td>
+                                    <td class="font-mono text-secondary" th:text="${tl.startDate}">Date début</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(teamLeaders)}" class="text-center text-muted py-3 text-xs bg-light rounded border">
+                        Aucun chef d'équipe enregistré.
+                    </div>
+                </div>
+
+                <!-- Section 3: Mandate history -->
+                <div class="card p-4 mb-4 shadow-sm border-0 bg-white">
+                    <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                        <span class="fs-5">🕒</span>
+                        <h5 class="fw-bold text-sm mb-0 text-dark">Historique des Mandats & Fonctions</h5>
+                    </div>
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(previousMandates)}">
+                        <table class="table table-sm table-hover mb-0 text-xs">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Membre désigné</th>
+                                    <th>Fonction / Mandat</th>
+                                    <th>Équipe / Axe affecté</th>
+                                    <th>Date Début</th>
+                                    <th>Date Fin</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pm : ${previousMandates}">
+                                    <td class="fw-bold text-dark" th:text="${pm.member != null ? pm.member.firstName + ' ' + pm.member.lastName : 'N/A'}">Membre</td>
+                                    <td class="text-muted" th:text="${pm.roleTitle}">Fonction</td>
+                                    <td class="text-secondary" th:text="${pm.teamAssigned != null ? pm.teamAssigned : (pm.member != null && pm.member.team != null ? pm.member.team.name : 'N/A')}">Équipe</td>
+                                    <td class="font-mono text-secondary" th:text="${pm.startDate}">Date Début</td>
+                                    <td class="font-mono text-secondary" th:text="${pm.endDate != null ? pm.endDate : 'N/A'}">Date Fin</td>
+                                    <td>
+                                        <span class="badge bg-success" th:if="${pm.active}">Actif</span>
+                                        <span class="badge bg-secondary" th:if="${!pm.active}">Terminé</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(previousMandates)}" class="text-center text-muted py-3 text-xs bg-light rounded border">
+                        Aucun historique.
+                    </div>
+                </div>
+
+                <!-- Static institutional notice -->
+                <div class="card p-4 shadow-sm border-0 bg-white">
+                    <h6 class="fw-bold text-sm mb-2 text-dark">Charte Institutionnelle du Laboratoire</h6>
+                    <p class="text-xs text-muted mb-0 leading-relaxed">Le Laboratoire LIAS de la Faculté des Sciences Ben M'Sik a été établi par décision souveraine du conseil de l'Université Hassan II de Casablanca. Ses décisions budgétaires, l'admissibilité des nouveaux doctorants et l'allocation des équipements sensibles sont ratifiés semestriellement.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Portail d\'Inscription Académique - LIAS')}"></head>
+<body class="d-flex align-items-center justify-content-center bg-white" style="min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; padding: 2rem 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                
+                <!-- University Academic Identity Header -->
+                <div class="text-center mb-4">
+                    <div th:replace="~{fragments :: fsbm-logo('light')}" class="mx-auto mb-2" style="max-width: 320px; height: auto;"></div>
+                    <div class="mt-3">
+                        <span class="badge bg-opacity-10 text-uppercase fw-bold px-3 py-1.5" style="background-color: rgba(15, 23, 42, 0.08); color: var(--univ-blue); letter-spacing: 1px; font-size: 11px;">
+                            Portail d'Accès Sécurisé
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Main Inscription Card -->
+                <div class="card border border-light p-4 shadow-lg bg-white" style="border-radius: 12px !important; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;">
+                    
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold m-0" style="color: var(--univ-blue); font-family: 'Georgia', serif; font-size: 1.35rem;">Laboratoire LIAS</h4>
+                        <p class="text-xs text-muted m-0 mt-1" style="font-size: 11.5px; letter-spacing: 0.5px;">Créer un nouveau compte universitaire</p>
+                        <div class="mt-2 mx-auto" style="width: 50px; height: 3px; background: var(--univ-gold); border-radius: 2px;"></div>
+                    </div>
+
+                    <form th:action="@{/register}" th:object="${registerDto}" method="post">
+                        <!-- Alerts -->
+                        <div th:if="${error}" class="alert alert-danger py-2 text-center border-0 font-mono" style="font-size: 11.5px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle-exclamation me-1.5"></i> <span th:text="${error}">Une erreur est survenue lors de l'enregistrement.</span>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div class="mb-3" id="fullName_group">
+                            <label for="fullName" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Nom Complet</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-user" style="font-size: 12px;"></i></span>
+                                <input type="text" class="form-control border-start-0 text-sm" id="fullName" name="fullName" th:field="*{fullName}" placeholder="ex: Ahmed ENNASSIRI" required style="font-size: 13px; font-weight: 500;">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3" id="email_group">
+                            <label for="email" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">E-mail universitaire</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-envelope" style="font-size: 12px;"></i></span>
+                                <input type="email" class="form-control border-start-0 text-sm" id="email" name="email" th:field="*{email}" placeholder="ex: ahmed@lias-lab.ma" required style="font-size: 13px; font-weight: 500;">
+                            </div>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="mb-3" id="username_group">
+                            <label for="username" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Nom d'utilisateur (Identifiant)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-id-card" style="font-size: 12px;"></i></span>
+                                <input type="text" class="form-control border-start-0 text-sm" id="username" name="username" th:field="*{username}" placeholder="ex: aennassiri" required style="font-size: 13px; font-weight: 500;">
+                            </div>
+                        </div>
+
+                        <!-- Password fields -->
+                        <div class="row">
+                            <div class="col-6 mb-3" id="password_group">
+                                <label for="password" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Mot de passe</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-lock" style="font-size: 12px;"></i></span>
+                                    <input type="password" class="form-control border-start-0 text-sm" id="password" name="password" th:field="*{password}" placeholder="••••••••" required style="font-size: 13px; font-weight: 500;">
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3" id="confirmPassword_group">
+                                <label for="confirmPassword" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Confirmer</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-lock" style="font-size: 12px;"></i></span>
+                                    <input type="password" class="form-control border-start-0 text-sm" id="confirmPassword" name="confirmPassword" th:field="*{confirmPassword}" placeholder="••••••••" required style="font-size: 13px; font-weight: 500;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Select -->
+                        <div class="mb-4" id="status_group">
+                            <label for="status" class="form-label text-xs fw-bold text-secondary text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Statut académique</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted" style="border-right: none;"><i class="fa-solid fa-graduation-cap" style="font-size: 12px;"></i></span>
+                                <select class="form-select border-start-0 text-sm" id="status" name="status" th:field="*{status}" required style="font-size: 13px; font-weight: 500; height: 38px;">
+                                    <option value="Doctorant">Doctorant</option>
+                                    <option value="Member">Chercheur (Membre Permanent)</option>
+                                    <option value="Associate">Chercheur Associé</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold text-uppercase d-flex align-items-center justify-content-center gap-2" 
+                                style="font-size: 12px; letter-spacing: 1px; background-color: var(--univ-blue) !important; border-color: var(--univ-blue) !important;" id="register_btn">
+                            <span>Créer mon compte</span> <i class="fa-solid fa-user-plus" style="font-size: 12px;"></i>
+                        </button>
+                    </form>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-3 pt-2 border-top">
+                        <span class="text-muted" style="font-size: 11px;">Déjà inscrit ?</span>
+                        <a href="/login" class="text-decoration-none fw-bold ms-1 text-sm" style="color: var(--univ-blue); font-size: 11.5px;">Se connecter</a>
+                    </div>
+                </div>
+
+                <!-- Footer back link -->
+                <div class="text-center mt-4">
+                    <a href="/home" class="text-decoration-none fw-semibold" style="color: var(--univ-blue); font-size: 12px;">
+                        <i class="fa-solid fa-house me-1"></i> Retour à l'accueil du Laboratoire
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

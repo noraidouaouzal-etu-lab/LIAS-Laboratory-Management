@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Publications Scientifiques - Laboratoire LIAS')}"></head>
+<body class="bg-light">
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <span class="badge text-uppercase tracking-wider px-3 py-1.5 mb-2 text-white" style="background-color: var(--univ-gold); font-size: 11px;">Production Scientifique</span>
+            <h2 class="fw-bold text-dark" style="font-family: Georgia, serif;">📚 Publications Scientifiques & Brevets</h2>
+            <p class="text-muted max-w-2xl mx-auto" style="font-size: 0.95rem;">
+                Consultez la liste complète des articles, journaux, conférences et publications scientifiques rédigés par les chercheurs du laboratoire LIAS.
+            </p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card border-0 shadow-sm p-3 mb-4" th:if="${not #lists.isEmpty(publications)}" style="border-radius: 12px !important;">
+            <div class="row align-items-center g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Rechercher par titre ou auteur..." onkeyup="filterPublications()">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="teamFilter" class="form-select" onchange="filterPublications()">
+                        <option value="">Toutes les équipes</option>
+                        <option th:each="t : ${teams}" th:value="${t.name}" th:text="${t.name}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end text-muted small">
+                    <span id="pubCount" class="fw-semibold text-primary" th:text="${publications.size()}">0</span> publications répertoriées
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Listing of Publications -->
+        <div class="card border-0 shadow-sm p-4" th:if="${not #lists.isEmpty(publications)}" style="border-radius: 12px !important;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="publicationsTable">
+                    <thead class="table-light">
+                        <tr style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <th style="width: 80px;">Année</th>
+                            <th>Titre de l'Article / Revue</th>
+                            <th>Auteurs</th>
+                            <th>Équipe de rattachement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="pub : ${publications}" class="pub-row" th:data-team="${pub.team != null ? pub.team : ''}">
+                            <td>
+                                <span class="badge bg-dark font-monospace text-white px-2 py-1.5" style="font-size: 12px;" th:text="${pub.year}">2026</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark text-slate-800" style="font-size: 14.5px;" th:text="${pub.title}">Titre de la publication scientifique</div>
+                            </td>
+                            <td class="text-primary small fw-semibold">
+                                <i class="fa-solid fa-user-pen text-secondary me-1"></i>
+                                <span th:text="${pub.author}">Auteurs</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border px-2 py-1" style="font-size: 11px;" th:text="${pub.team != null ? pub.team : 'Aide à la Décision'}">Aide à la Décision</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State Alert (User requirement 3) -->
+        <div class="alert alert-info text-center py-5 shadow-sm border-0" th:if="${#lists.isEmpty(publications)}" style="border-radius: 12px;">
+            <i class="fa-solid fa-book-bookmark fa-3x mb-3 text-secondary"></i>
+            <h4 class="fw-bold">Aucune publication disponible</h4>
+            <p class="text-secondary mb-0">La base de données des publications scientifiques du laboratoire est vide actuellement.</p>
+        </div>
+    </div>
+
+    <!-- Client-side filtering script -->
+    <script th:if="${not #lists.isEmpty(publications)}">
+        function filterPublications() {
+            var searchVal = document.getElementById("searchInput").value.toLowerCase();
+            var teamVal = document.getElementById("teamFilter").value.toLowerCase();
+            var table = document.getElementById("publicationsTable");
+            var rows = table.getElementsByClassName("pub-row");
+            var visibleCount = 0;
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var titleText = row.cells[1].textContent.toLowerCase();
+                var authorText = row.cells[2].textContent.toLowerCase();
+                var teamText = row.getAttribute("data-team").toLowerCase();
+
+                var matchesSearch = titleText.includes(searchVal) || authorText.includes(searchVal);
+                var matchesTeam = teamVal === "" || teamText.includes(teamVal);
+
+                if (matchesSearch && matchesTeam) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            }
+            document.getElementById("pubCount").textContent = visibleCount;
+        }
+    </script>
+</body>
+</html>

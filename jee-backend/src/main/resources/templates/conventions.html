@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Accords-cadres & Partenariats - LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Dynamic Sidebar -->
+            <div th:replace="~{fragments :: sidebar-dynamic('conventions')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">🤝 Accords-cadres de Partenariat & Coopération</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Convention d'accord-cadre enregistrée et signée avec succès.
+                </div>
+                <div th:if="${param.deleted}" class="alert alert-danger py-2 text-xs">
+                    Convention d'accord-cadre supprimée de l'archive.
+                </div>
+                <div th:if="${param.approved}" class="alert alert-success py-2 text-xs">
+                    Convention d'accord-cadre approuvée avec succès.
+                </div>
+                <div th:if="${param.rejected}" class="alert alert-danger py-2 text-xs">
+                    Convention d'accord-cadre rejetée avec succès.
+                </div>
+
+                <!-- Create / Edit Convention Form (Director/Admin only) -->
+                <div class="card p-3 mb-4" th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+                    <h5 class="fw-bold text-xs uppercase mb-3 text-primary" id="form-title">Enregistrer un accord-cadre ou partenariat</h5>
+                    <form th:action="@{/director/conventions/save}" method="post" enctype="multipart/form-data" th:object="${newConvention}">
+                        <input type="hidden" id="edit-id" th:field="*{id}">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Partenaire institutionnel</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-partner" placeholder="ex: Masen, OCP" th:field="*{partner}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Description / Objet de l'échange</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-description" placeholder="ex: Intégration énergétique" th:field="*{description}" required>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Uploader document (PDF)</label>
+                                <input type="file" name="conventionFile" class="form-control form-control-sm text-xs">
+                                <input type="hidden" id="edit-documentPath" th:field="*{documentPath}">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label text-xs fw-semibold">Activités & Suivi</label>
+                                <input type="text" class="form-control form-control-sm" id="edit-activitiesTracked" placeholder="ex: Réunion trimestrielle initiée" th:field="*{activitiesTracked}">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-xs fw-semibold">Date de ratification</label>
+                                <input type="date" class="form-control form-control-sm" id="edit-date" th:field="*{date}">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-xs fw-semibold">Date de début de validité</label>
+                                <input type="date" class="form-control form-control-sm" id="edit-startDate" th:field="*{startDate}">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-xs fw-semibold">Date de fin de validité</label>
+                                <input type="date" class="form-control form-control-sm" id="edit-endDate" th:field="*{endDate}">
+                            </div>
+                            <div class="col-md-12 text-end mt-2">
+                                <button type="button" id="cancel-edit-btn" class="btn btn-outline-secondary btn-sm px-3 me-2" style="display: none;" onclick="clearEditForm()">Annuler la modification</button>
+                                <button type="submit" class="btn btn-primary btn-sm px-4">💾 Sauvegarder l'accord</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Search Panel -->
+                <div class="card p-3 mb-4 shadow-sm">
+                    <form th:action="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')} ? @{/director/conventions} : @{/member/conventions}" method="get" class="row g-2 align-items-center">
+                        <div class="col-md-9">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" name="search" th:value="${search}" class="form-control form-control-sm border-start-0" placeholder="Rechercher par partenaire ou objet/description...">
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm px-3 flex-grow-1">🔍 Rechercher</button>
+                            <a th:href="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')} ? @{/director/conventions} : @{/member/conventions}" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i></a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card p-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Partenaire</th>
+                                <th>Objet / Description</th>
+                                <th>Dates (Signature / Validité)</th>
+                                <th>Lien document</th>
+                                <th>Suivi des activités</th>
+                                <th>Statut</th>
+                                <th th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cov : ${conventions}">
+                                <td class="fw-bold" th:text="${cov.partner}">Masen</td>
+                                <td th:text="${cov.description}">Intégrité énergétique</td>
+                                <td>
+                                    <div class="fw-bold" th:text="${'Signé: ' + (cov.date != null ? cov.date : 'N/A')}">2026-06-12</div>
+                                    <div class="text-2xs text-secondary mt-1" th:if="${cov.startDate != null || cov.endDate != null}">
+                                        <span th:text="${'Début: ' + (cov.startDate != null ? cov.startDate : 'N/A')}"></span> | 
+                                        <span th:text="${'Fin: ' + (cov.endDate != null ? cov.endDate : 'N/A')}"></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:if="${cov.documentPath == null || cov.documentPath == ''}" class="text-muted text-xs">Aucun document</span>
+                                    <div th:if="${cov.documentPath != null && cov.documentPath != ''}">
+                                        <a th:if="${#strings.startsWith(cov.documentPath, 'http') or #strings.startsWith(cov.documentPath, '/')}" th:href="${cov.documentPath}" class="btn btn-link p-0 text-decoration-none text-xs fw-semibold" target="_blank">
+                                            🔗 Consulter
+                                        </a>
+                                        <a th:unless="${#strings.startsWith(cov.documentPath, 'http') or #strings.startsWith(cov.documentPath, '/')}" th:href="@{/conventions/download/{id}(id=${cov.id})}" class="btn btn-outline-secondary btn-xs py-1 px-2 text-xs" target="_blank">
+                                            📥 Télécharger
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:text="${cov.activitiesTracked != null ? cov.activitiesTracked : 'Aucune réunion planifiée'}">Réunion...</span>
+                                </td>
+                                <td>
+                                    <span th:with="compStatus=${cov.computedStatus}"
+                                          th:class="${'badge ' + (compStatus == 'ACTIVE' ? 'bg-success' : (compStatus == 'EXPIRED' ? 'bg-danger' : (compStatus == 'REJECTED' ? 'bg-danger' : 'bg-warning')))}" 
+                                          th:text="${compStatus}">PENDING</span>
+                                </td>
+                                <td th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <div th:if="${cov.status == null || cov.status == 'PENDING'}" class="d-flex gap-1">
+                                            <form th:action="@{/director/conventions/approve/{id}(id=${cov.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-success btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Approuver">✅</button>
+                                            </form>
+                                            <form th:action="@{/director/conventions/reject/{id}(id=${cov.id})}" method="post" class="m-0">
+                                                <button type="submit" class="btn btn-danger btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Rejeter">❌</button>
+                                            </form>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Modifier"
+                                                th:data-id="${cov.id}"
+                                                th:data-partner="${cov.partner != null ? cov.partner : ''}"
+                                                th:data-description="${cov.description != null ? cov.description : ''}"
+                                                th:data-docpath="${cov.documentPath != null ? cov.documentPath : ''}"
+                                                th:data-activities="${cov.activitiesTracked != null ? cov.activitiesTracked : ''}"
+                                                th:data-date="${cov.date != null ? cov.date : ''}"
+                                                th:data-startdate="${cov.startDate != null ? cov.startDate : ''}"
+                                                th:data-enddate="${cov.endDate != null ? cov.endDate : ''}"
+                                                onclick="editConvention(this.getAttribute('data-id'), this.getAttribute('data-partner'), this.getAttribute('data-description'), this.getAttribute('data-docpath'), this.getAttribute('data-activities'), this.getAttribute('data-date'), this.getAttribute('data-startdate'), this.getAttribute('data-enddate'))">✏️</button>
+                                        <form th:action="@{/director/conventions/delete/{id}(id=${cov.id})}" method="post" onsubmit="return confirm('Vouliez-vous vraiment supprimer cette convention?');" class="m-0">
+                                            <button type="submit" class="btn btn-outline-danger btn-xs py-0 px-2 font-semibold" style="font-size: 11px;" title="Supprimer">🗑️</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(conventions)}">
+                                <td colspan="7" class="text-center text-muted py-4">Aucune convention enregistrée.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script th:if="${#authorization.expression('hasRole(''ROLE_DIRECTOR'') or hasRole(''ROLE_ADMIN'')')}">
+        function editConvention(id, partner, description, documentPath, activitiesTracked, date, startDate, endDate) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-partner').value = partner;
+            document.getElementById('edit-description').value = description;
+            document.getElementById('edit-documentPath').value = documentPath || '';
+            document.getElementById('edit-activitiesTracked').value = activitiesTracked || '';
+            document.getElementById('edit-date').value = date || '';
+            document.getElementById('edit-startDate').value = startDate || '';
+            document.getElementById('edit-endDate').value = endDate || '';
+            
+            document.getElementById('form-title').innerText = "Modifier la convention : " + partner;
+            document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+            
+            // Focus on partner input field
+            document.getElementById('edit-partner').focus();
+        }
+
+        function clearEditForm() {
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-partner').value = '';
+            document.getElementById('edit-description').value = '';
+            document.getElementById('edit-documentPath').value = '';
+            document.getElementById('edit-activitiesTracked').value = '';
+            document.getElementById('edit-date').value = '';
+            document.getElementById('edit-startDate').value = '';
+            document.getElementById('edit-endDate').value = '';
+            
+            document.getElementById('form-title').innerText = "Enregistrer un accord-cadre ou partenariat";
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

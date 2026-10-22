@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Communication Restreinte - Laboratoire LIAS')}"></head>
+<body>
+    <nav th:replace="~{fragments :: navbar}"></nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebars Dynamic -->
+            <div th:replace="~{fragments :: sidebar-dynamic('communication')}"></div>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h4">💬 Canaux de Communication Sécurisés (Membres Permanents)</h1>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success py-2 text-xs">
+                    Message interne diffusé avec succès sur les canaux de recherche.
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5 mb-4">
+                        <div class="card p-3 mb-4">
+                            <h5 class="fw-bold text-xs uppercase mb-3">✉️ Diffuser une Note Interne</h5>
+                            <form th:action="@{/communication/send}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Canal thématique</label>
+                                    <select class="form-select form-select-sm text-xs" name="channelType" required>
+                                        <option value="GLOBAL">GLOBAL (Tout le Laboratoire)</option>
+                                        <option value="TEAM">TEAM (Spécifique à l'équipe)</option>
+                                        <option value="EVENT">EVENT (Spécifique à l'événement)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Sous-canal ou Nom du projet / Événement</label>
+                                    <input type="text" class="form-control form-control-sm text-xs" name="channelName" placeholder="ex: RSFIS Team, SmartCities 2026, ou Lab Global" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-semibold">Message</label>
+                                    <textarea class="form-control text-xs" rows="5" name="content" placeholder="Saisissez votre note de recherche..." required></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm px-3">🚀 Envoyer le message</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 mb-4">
+                        <div class="card p-3">
+                            <h5 class="fw-bold text-xs uppercase mb-3">📰 Flux de Discussions Récents (Membres & Directions)</h5>
+                            
+                            <!-- Search / Filters Form -->
+                            <form th:action="@{/communication}" method="get" class="mb-3 border-bottom pb-3">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm text-xs" name="author" th:value="${param.author}" placeholder="👤 Auteur...">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm text-xs" name="channel" th:value="${param.channel}" placeholder="📺 Canal (GLOBAL, TEAM, EVENT...)">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm text-xs" name="keyword" th:value="${param.keyword}" placeholder="🔑 Mot-clé...">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                    <a th:href="@{/communication}" class="btn btn-outline-secondary btn-xs py-1 px-2 text-xs" th:if="${(param.author != null && !param.author.toString().isEmpty()) || (param.channel != null && !param.channel.toString().isEmpty()) || (param.keyword != null && !param.keyword.toString().isEmpty())}">
+                                        ✖️ Réinitialiser
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-xs py-1 px-3 text-xs">
+                                        🔍 Filtrer
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                                <div class="list-group-item px-0 py-3" th:each="msg : ${messages}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge bg-primary font-mono text-uppercase" style="font-size: 8px;" th:text="${msg.channelType}">GLOBAL</span>
+                                            <span class="badge bg-secondary font-mono text-uppercase" style="font-size: 8px;" th:text="${msg.channelName}">RSFIS</span>
+                                        </div>
+                                        <span class="text-xs text-muted" th:text="${#temporals.format(msg.date, 'dd/MM/yyyy HH:mm')}">Date</span>
+                                    </div>
+                                    <div class="text-xs text-dark mt-2 fw-semibold" style="font-size: 11px;">
+                                        Envoyé par : <span class="text-primary" th:text="${msg.authorFullName}">Nora Idouaouzal</span>
+                                        <span class="badge bg-light text-secondary border font-sans ms-1" style="font-size: 9px;" th:text="${msg.authorRole}">Doctorant</span>
+                                    </div>
+                                    <p class="text-xs text-secondary mt-1 mb-0 leading-relaxed" th:text="${msg.content}">Message text body</p>
+                                </div>
+                                
+                                <div class="list-group-item px-0 py-4 text-center text-muted text-xs fw-semibold" th:if="${#lists.isEmpty(messages)}">
+                                    Aucune discussion.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
